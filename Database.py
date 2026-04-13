@@ -1,13 +1,9 @@
-diff --git a/Database.py b/Database.py
-index b27f8e3c62f735d0581d55657d61eb6034ca3950..2bfd5f3fea63f54f1da7c62c7333abc3e00dc15c 100644
---- a/Database.py
-+++ b/Database.py
-@@ -1,123 +1,177 @@
--import tkinter as tk
--from tkinter import ttk, messagebox
--import requests  # Make sure you ran 'pip install requests'
--
--class StudySmartApp:
+import tkinter as tk
+from tkinter import ttk, messagebox
+import requests  # Make sure you ran 'pip install requests'
+
+
+class StudySmartApp:
 -    def __init__(self, root):
 -        self.root = root
 -        self.root.title("StudySmart: Student Task Manager (MySQL Version)")

@@ -1,4 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+try:
+    from flask import Flask, render_template, request, jsonify
+except ImportError:
+    raise ImportError("Flask is not installed. Install it using: pip install flask")
+
 from datetime import datetime
 
 app = Flask(__name__)
