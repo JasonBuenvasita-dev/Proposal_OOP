@@ -73,31 +73,69 @@
         </div>
     </div>
 </div>
+<style>
+    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* The animated gradient header */
+    .header-section { 
+        background: linear-gradient(-45deg, #2c3e50, #4ca1af, #2c3e50);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        color: white; padding: 40px; text-align: center; 
+    }
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 
+    .card { border-radius: 15px; transition: transform 0.3s ease; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+    
+    /* Priority Colors */
+    .badge-high { background-color: #e74c3c; }
+    .badge-medium { background-color: #f1c40f; color: black; }
+    .badge-low { background-color: #2ecc71; }
+</style>
 <script>
 document.getElementById('taskForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Create form data to send to PHP
-    let formData = new FormData();
-    formData.append('task_name', document.getElementById('task_name').value);
-    formData.append('subject', document.getElementById('subject').value);
-    formData.append('deadline', document.getElementById('deadline').value);
-    formData.append('priority', document.getElementById('priority').value);
+    // Get the data from your form
+    const name = document.getElementById('task_name').value;
+    const subj = document.getElementById('subject').value;
+    const date = document.getElementById('deadline').value;
+    const prio = document.getElementById('priority').value;
 
-    // Use Fetch API (JavaScript) to talk to your save_task.php
+    // Pick the right color for the priority badge
+    let badgeClass = 'badge-low';
+    if(prio === 'High') badgeClass = 'badge-high';
+    if(prio === 'Medium') badgeClass = 'badge-medium';
+
+    // 1. Prepare data for PHP
+    let formData = new FormData(this);
+
+    // 2. Send to your save_task.php
     fetch('save_task.php', {
         method: 'POST',
         body: formData
     })
     .then(response => response.text())
     .then(data => {
-        if(data.trim() === "Success") {
-            alert("Task Added Successfully!");
-            location.reload(); // Refresh to see the new task
-        } else {
-            alert("Error: " + data);
-        }
+        // 3. Add to the table immediately (lively effect!)
+        const tableBody = document.getElementById('taskTableBody');
+        const newRow = `
+            <tr style="animation: fadeIn 0.5s forwards">
+                <td><strong>${name}</strong></td>
+                <td>${subj}</td>
+                <td>${date}</td>
+                <td><span class="badge ${badgeClass}">${prio}</span></td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML('afterbegin', newRow);
+        
+        // 4. Reset form
+        document.getElementById('taskForm').reset();
     });
 });
 </script>
