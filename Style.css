@@ -1,0 +1,36 @@
+/* Animated background gradient */
+.header-section {
+    background: linear-gradient(-45deg, #2c3e50, #4ca1af, #2c3e50);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    color: white; padding: 40px; text-align: center;
+    border-radius: 0 0 20px 20px;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Make cards pop on hover */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+}
+
+/* Priority Badges */
+.badge-high { background-color: #e74c3c; }
+.badge-medium { background-color: #f1c40f; color: black; }
+.badge-low { background-color: #2ecc71; }
+
+/* "Empty State" styling */
+#noTasks {
+    text-align: center;
+    padding: 20px;
+    color: #95a5a6;
+    font-style: italic;
+}
