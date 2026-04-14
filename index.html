@@ -108,6 +108,34 @@ function checkDeadline(taskName, deadlineStr) {
     if (diff > 0 && diff <= 24) {
         alert(`⚠️ URGENT: "${taskName}" is due within 24 hours!`);
     }
+    // 1. Initialize Supabase
+const supabaseUrl = 'YOUR_SUPABASE_URL';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+// 2. Update the form submission
+document.getElementById('taskForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const taskData = {
+        task_name: document.getElementById('task_name').value,
+        subject: document.getElementById('subject').value,
+        deadline: document.getElementById('deadline').value,
+        priority: document.getElementById('priority').value
+    };
+
+    // 3. Send to Database
+    const { data, error } = await _supabase
+        .from('tasks')
+        .insert([taskData]);
+
+    if (error) {
+        alert("Error saving: " + error.message);
+    } else {
+        alert("Task saved to the cloud!");
+        location.reload(); // Refresh to show the new task
+    }
+});
 }
 
 /* TIMER */
