@@ -102,6 +102,30 @@
     .badge-low { background-color: #2ecc71; }
 </style>
 <script>
+let timeLeft = 1500; // 25 minutes in seconds
+let timerId = null;
+
+function toggleTimer() {
+    if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+        document.getElementById('timerBtn').innerText = "Start";
+    } else {
+        timerId = setInterval(() => {
+            timeLeft--;
+            updateDisplay();
+            if (timeLeft === 0) clearInterval(timerId);
+        }, 1000);
+        document.getElementById('timerBtn').innerText = "Pause";
+    }
+}
+
+function updateDisplay() {
+    let mins = Math.floor(timeLeft / 60);
+    let secs = timeLeft % 60;
+    document.getElementById('timerDisplay').innerText = 
+        `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
 document.getElementById('taskForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
