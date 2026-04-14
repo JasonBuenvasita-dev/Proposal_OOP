@@ -79,7 +79,7 @@
 </div>
 <style>
     body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    
+    <canvas id="subjectChart" width="200" height="200"></canvas>
     /* The animated gradient header */
     .header-section { 
         background: linear-gradient(-45deg, #2c3e50, #4ca1af, #2c3e50);
@@ -126,7 +126,20 @@ function updateDisplay() {
     document.getElementById('timerDisplay').innerText = 
         `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
-document.getElementById('taskForm').addEventListener('submit', function(e) {
+function updateChart(subjectData) {
+    const ctx = document.getElementById('subjectChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(subjectData), // e.g., ['Programming', 'Ethics']
+            datasets: [{
+                data: Object.values(subjectData), // e.g., [5, 2]
+                backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f']
+            }]
+        }
+    });
+}
+    document.getElementById('taskForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
     // Get the data from your form
@@ -174,6 +187,18 @@ function calculateUrgency(priority, deadline) {
     
     // A smaller diffDays (closer deadline) increases the total score
     return priorityWeight - diffDays; 
+
+.focus-active .header-section, .focus-active .col-md-4 {
+    display: none;
+}
+.focus-active .col-md-8 {
+    width: 100%; /* Make the table take up the full screen */
+}
+}
+function toggleFocus() {
+    document.body.classList.toggle('focus-active');
+    let btn = document.getElementById('focusBtn');
+    btn.innerText = document.body.classList.contains('focus-active') ? "Exit Focus" : "Focus Mode";
 }
     });
 });
