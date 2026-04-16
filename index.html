@@ -92,12 +92,13 @@
 </div>
 
 <script>
-// 1. SUPABASE INITIALIZATION
+/* 1. SUPABASE INITIALIZATION */
+// These credentials link your website to your specific Supabase project
 const supabaseUrl = 'https://lafiafbqccrojlkjgcvk.supabase.co';
 const supabaseKey = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We'; 
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// 2. FETCH TASKS ON LOAD
+/* 2. FETCH TASKS ON LOAD */
 async function fetchTasks() {
     const { data: tasks, error } = await _supabase
         .from('tasks')
@@ -120,7 +121,7 @@ async function fetchTasks() {
             </tr>`;
             tableBody.insertAdjacentHTML('beforeend', row);
             
-            // Collect data for chart
+            // Collect chart data
             let subj = task.subject || "General";
             currentSubjectData[subj] = (currentSubjectData[subj] || 0) + 1;
         });
@@ -130,7 +131,7 @@ async function fetchTasks() {
     }
 }
 
-// 3. SAVE TASK
+/* 3. SAVE TASK */
 document.getElementById('taskForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -144,6 +145,7 @@ document.getElementById('taskForm').addEventListener('submit', async function(e)
         priority: document.getElementById('priority').value
     };
 
+    // Check if task is due within 24 hours
     checkDeadline(name, date);
 
     const { data, error } = await _supabase
@@ -155,11 +157,11 @@ document.getElementById('taskForm').addEventListener('submit', async function(e)
     } else {
         alert("Task saved to the cloud!");
         this.reset();
-        fetchTasks(); 
+        fetchTasks(); // Refresh the table automatically
     }
 });
 
-// 4. CHART LOGIC
+/* 4. CHART LOGIC */
 let myChart = null;
 function updateChart(data) {
     const ctx = document.getElementById('subjectChart').getContext('2d');
@@ -168,32 +170,45 @@ function updateChart(data) {
         type: 'pie',
         data: {
             labels: Object.keys(data),
-            datasets: [{ data: Object.values(data), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f'] }]
+            datasets: [{ 
+                data: Object.values(data), 
+                backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f'] 
+            }]
         }
     });
 }
 
-// 5. UTILITIES (TIMER, DARK MODE, FOCUS)
+/* 5. UTILITIES */
 let timeLeft = 1500, timerId = null;
 function toggleTimer() {
-    if (timerId) { clearInterval(timerId); timerId = null; document.getElementById('timerBtn').innerText = "Start"; }
-    else { timerId = setInterval(() => { timeLeft--; updateTimerDisp(); }, 1000); document.getElementById('timerBtn').innerText = "Pause"; }
+    if (timerId) { 
+        clearInterval(timerId); 
+        timerId = null; 
+        document.getElementById('timerBtn').innerText = "Start"; 
+    } else { 
+        timerId = setInterval(() => { timeLeft--; updateTimerDisp(); }, 1000); 
+        document.getElementById('timerBtn').innerText = "Pause"; 
+    }
 }
+
 function updateTimerDisp() {
     let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
     document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
 }
+
 function checkDeadline(taskName, deadlineStr) {
     const diff = (new Date(deadlineStr) - new Date()) / (1000 * 60 * 60);
-    if (diff > 0 && diff <= 24) alert(`⚠️ URGENT: "${taskName}" is due soon!`);
+    if (diff > 0 && diff <= 24) alert(`⚠️ URGENT: "${taskName}" is due within 24 hours!`);
 }
+
 function toggleDarkMode() {
     const body = document.body;
     body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
+
 function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
-// Run on page load
+// Run fetch on initial load
 fetchTasks();
 </script>
 </body>
