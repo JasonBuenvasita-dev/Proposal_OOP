@@ -254,7 +254,44 @@ function toggleDarkMode() {
     if(myChart) fetchTasks(); 
 }
 function toggleFocus() { document.body.classList.toggle('focus-active'); }
+/* CHART & TASKS */
+let subjectData = {}, myChart = null;
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('task_name').value;
+    const subj = document.getElementById('subject').value || "General";
+    const date = document.getElementById('deadline').value;
+    const prio = document.getElementById('priority').value;
 
+    // Check for 24hr warning
+    checkDeadline(name, date);
+
+    // Update Chart
+    subjectData[subj] = (subjectData[subj] || 0) + 1;
+    renderChart();
+
+    // Add to Table
+    const row = `<tr>
+        <td>${name}</td><td>${subj}</td><td>${date}</td>
+        <td><span class="badge badge-${prio.toLowerCase()}">${prio}</span></td>
+    </tr>`;
+    document.getElementById('taskTableBody').insertAdjacentHTML('afterbegin', row);
+    this.reset();
+});
+
+function renderChart() {
+    const ctx = document.getElementById('subjectChart').getContext('2d');
+    if (myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(subjectData),
+            datasets: [{ data: Object.values(subjectData), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f'] }]
+        }
+    });
+}
+
+function toggleFocus() { document.body.classList.toggle('focus-active'); }
 window.onload = fetchTasks;
 </script>
 </body>
