@@ -4,258 +4,534 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudySmart | Task Manager</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
         :root {
-            --bg-color: radial-gradient(circle at top, #f8fcff 0%, #eef2ff 40%, #f9f0ff 100%);
-            --text-color: #1f2937;
-            --card-bg: rgba(255, 255, 255, 0.92);
-            --card-border: rgba(99, 102, 241, 0.2);
-            --accent: #6d28d9;
-            --accent-alt: #0ea5e9;
-            --table-hover: rgba(79, 70, 229, 0.08);
+            --bg: #f0f2ff;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: rgba(109, 40, 217, 0.12);
+            --text: #1e1b4b;
+            --text-muted: #6b7280;
+            --accent: #7c3aed;
+            --accent2: #0ea5e9;
+            --input-bg: #f8f7ff;
+            --input-border: #e0d9ff;
+            --shadow: 0 8px 32px rgba(109, 40, 217, 0.10);
         }
 
         [data-theme="dark"] {
-            --bg-color: radial-gradient(circle at top, #101827 0%, #0f172a 45%, #111827 100%);
-            --text-color: #e5e7eb;
-            --card-bg: rgba(30, 41, 59, 0.88);
-            --card-border: rgba(100, 116, 139, 0.28);
-            --accent: #94a3b8;
-            --accent-alt: #64748b;
-            --table-hover: rgba(100, 116, 139, 0.16);
+            --bg: #0f0e1a;
+            --card-bg: rgba(22, 20, 40, 0.97);
+            --card-border: rgba(139, 92, 246, 0.18);
+            --text: #ede9fe;
+            --text-muted: #9ca3af;
+            --accent: #a78bfa;
+            --accent2: #38bdf8;
+            --input-bg: #1a1730;
+            --input-border: #2e2850;
+            --shadow: 0 8px 32px rgba(0,0,0,0.35);
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', sans-serif;
-            transition: 0.3s;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+            transition: background 0.3s, color 0.3s;
             min-height: 100vh;
         }
 
+        /* ── HEADER ── */
         .header-section {
             background: linear-gradient(-45deg, #7c3aed, #0ea5e9, #f43f5e, #7c3aed);
             background-size: 320% 320%;
-            animation: gradient 14s ease infinite;
+            animation: gradientShift 14s ease infinite;
             color: white;
-            padding: 48px 32px;
+            padding: 44px 32px 52px;
             text-align: center;
-            border-radius: 0 0 28px 28px;
-            box-shadow: 0 18px 45px rgba(79, 70, 229, 0.35);
+            border-radius: 0 0 32px 32px;
+            box-shadow: 0 16px 48px rgba(109, 40, 217, 0.30);
+            position: relative;
+            overflow: hidden;
         }
 
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .header-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 60%, rgba(255,255,255,0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 18px;
-            border: 1px solid var(--card-border);
-            box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
+        .header-section h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .header-section p {
+            opacity: 0.85;
+            font-size: 0.95rem;
             margin-bottom: 20px;
-            backdrop-filter: blur(8px);
         }
 
-        .badge-high { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
-        .badge-medium { background: linear-gradient(135deg, #facc15, #f59e0b) !important; color: #111827 !important; }
-        .badge-low { background: linear-gradient(135deg, #22c55e, #16a34a) !important; }
+        /* ── CARDS ── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            margin-bottom: 18px;
+            color: var(--text);
+        }
 
-        #statusMessage {
-            margin-bottom: 12px;
-            border-radius: 12px;
-            padding: 10px 14px;
-            font-size: 0.92rem;
+        .card h5, .card h6 {
+            color: var(--text);
             font-weight: 600;
-            display: none;
         }
 
+        /* ── TIMER ── */
+        .timer-num {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--accent);
+        }
+
+        /* ── FORM INPUTS ── */
+        .form-control, .form-select {
+            background: var(--input-bg) !important;
+            border: 1.5px solid var(--input-border) !important;
+            color: var(--text) !important;
+            border-radius: 10px !important;
+            font-size: 0.9rem;
+            padding: 9px 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
+            outline: none;
+        }
+
+        .form-control::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+        /* ── BUTTONS ── */
+        .btn-save {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-save:hover  { opacity: 0.92; transform: translateY(-1px); }
+        .btn-save:active { transform: scale(0.98); }
+
+        .btn-outline-light {
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.88 !important; }
+
+        /* ── TABLE ── */
+        .table {
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .table thead th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1.5px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
+        .table tbody tr td {
+            border-bottom: 1px solid var(--card-border);
+            padding: 10px 8px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:last-child td { border-bottom: none; }
+
+        .table tbody tr:hover td {
+            background: rgba(124, 58, 237, 0.04);
+        }
+
+        /* ── PRIORITY BADGES ── */
+        .badge-high   { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .badge-medium { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .badge-low    { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+
+        .badge {
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── STATUS ── */
+        #statusMessage {
+            display: none;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
         .show-msg { display: block !important; }
 
-        .focus-active .header-section, .focus-active .col-md-4 { display: none; }
-        .focus-active .col-md-8 { width: 100%; }
+        /* ── TASK COUNTER ── */
+        #taskCounter {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 30px 16px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .empty-state .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        /* ── FOCUS MODE ── */
+        .focus-active .header-section { display: none; }
+        .focus-active .left-col       { display: none; }
+        .focus-active .right-col      { width: 100%; max-width: 100%; flex: 0 0 100%; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--input-border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <div class="header-section mb-4">
-    <h1>STUDY SMART</h1>
+    <h1>📚 STUDY SMART</h1>
     <p>Manage your Academic Deadlines Efficiently</p>
-    <div class="btn-group">
-        <button class="btn btn-outline-light btn-sm" onclick="toggleFocus()">Focus Mode</button>
-        <button class="btn btn-outline-light btn-sm" onclick="toggleDarkMode()">Dark Mode</button>
+    <div class="btn-group gap-2">
+        <button class="btn btn-outline-light btn-sm" onclick="toggleFocus()">🎯 Focus Mode</button>
+        <button class="btn btn-outline-light btn-sm" onclick="toggleDarkMode()">🌙 Dark Mode</button>
     </div>
 </div>
 
-<div class="container">
+<div class="container pb-5">
+
+    <!-- STATUS MESSAGE -->
     <div id="statusMessage" class="alert" role="status"></div>
 
     <div class="row">
-        <div class="col-md-4">
+
+        <!-- LEFT COLUMN -->
+        <div class="col-md-4 left-col">
+
+            <!-- POMODORO TIMER -->
             <div class="card p-3 text-center">
-                <h6>🍅 Pomodoro Timer</h6>
-                <h2 id="timerDisplay">25:00</h2>
-                <button class="btn btn-primary btn-sm" onclick="toggleTimer()" id="timerBtn">Start</button>
+                <h6 class="mb-2">🍅 Pomodoro Timer</h6>
+                <div class="timer-num" id="timerDisplay">25:00</div>
+                <button class="btn btn-primary btn-sm mt-2 px-4" onclick="toggleTimer()" id="timerBtn">Start</button>
             </div>
 
+            <!-- PIE CHART -->
             <div class="card p-3">
-                <h6 class="text-center">📊 Subject Distribution</h6>
-                <canvas id="subjectChart"></canvas>
+                <h6 class="text-center mb-2">📊 Subject Distribution</h6>
+                <div style="position:relative; max-height:220px;">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+                <p class="text-center mt-2 mb-0" id="chartEmpty" style="color:var(--text-muted); font-size:0.82rem; display:none;">
+                    Add tasks to see your chart
+                </p>
             </div>
 
+            <!-- ADD TASK FORM -->
             <div class="card p-4">
-                <h5>Add New Task</h5>
-                <form id="taskForm">
-                    <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" required>
-                    <input type="text" id="subject" class="form-control mb-2" placeholder="Subject">
-                    <input type="date" id="deadline" class="form-control mb-2" required>
-                    <select id="priority" class="form-select mb-3">
-                        <option value="High">High</option>
-                        <option value="Medium" selected>Medium</option>
-                        <option value="Low">Low</option>
-                    </select>
-                    <button type="submit" class="btn btn-success w-100">Save Task</button>
-                </form>
+                <h5 class="mb-3">✏️ Add New Task</h5>
+                <input  type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
+                <input  type="text" id="subject"   class="form-control mb-2" placeholder="Subject (e.g. DBMS)" />
+                <input  type="date" id="deadline"  class="form-control mb-2" />
+                <select id="priority" class="form-select mb-3">
+                    <option value="High">🔴 High</option>
+                    <option value="Medium" selected>🟡 Medium</option>
+                    <option value="Low">🟢 Low</option>
+                </select>
+                <button class="btn-save" onclick="saveTask()">Save Task</button>
             </div>
+
         </div>
 
-        <div class="col-md-8">
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-8 right-col">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5>Pending Tasks</h5>
+                <h5 class="mb-0" style="font-weight:700;">Pending Tasks</h5>
                 <span class="badge bg-primary" id="taskCounter">0 Tasks</span>
             </div>
             <div class="card p-3">
-                <table class="table" style="color: inherit;">
-                    <thead>
-                        <tr><th>Task</th><th>Subject</th><th>Deadline</th><th>Priority</th></tr>
-                    </thead>
-                    <tbody id="taskTableBody"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="icon">📋</div>
+                                        No tasks yet — add one to get started!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-// 1. SUPABASE INITIALIZATION
-const supabaseUrl = 'https://lafiafbqccrojlkjgcvk.supabase.co';
-const supabaseKey = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    /* ────────────────────────────────
+       DATA STORE
+    ──────────────────────────────── */
+    let tasks = [];
 
-window.alert = function() {};
-
-// 2. SHOW STATUS MESSAGE
-function showStatus(message, type = "info") {
-    const box = document.getElementById('statusMessage');
-    box.className = `alert alert-${type === 'warning' ? 'danger' : type} show-msg`;
-    box.innerText = message;
-    setTimeout(() => { box.classList.remove('show-msg'); }, 4000);
-}
-
-// 3. FETCH TASKS & UPDATE CHART
-let myChart = null;
-
-async function fetchTasks() {
-    const { data: tasks, error } = await _supabase
-        .from('tasks')
-        .select('*')
-        .order('id', { ascending: false });
-
-    if (error) {
-        showStatus("Could not sync with cloud", "warning");
-        return;
+    /* ────────────────────────────────
+       STATUS MESSAGE
+    ──────────────────────────────── */
+    function showStatus(message, type = "success") {
+        const box = document.getElementById('statusMessage');
+        box.className = `alert alert-${type} show-msg`;
+        box.innerText = message;
+        setTimeout(() => { box.classList.remove('show-msg'); }, 3500);
     }
 
-    const tableBody = document.getElementById('taskTableBody');
-    tableBody.innerHTML = '';
-    let currentSubjectData = {};
+    /* ────────────────────────────────
+       SAVE TASK
+    ──────────────────────────────── */
+    function saveTask() {
+        const name     = document.getElementById('task_name').value.trim();
+        const subject  = document.getElementById('subject').value.trim() || "General";
+        const deadline = document.getElementById('deadline').value;
+        const priority = document.getElementById('priority').value;
 
-    tasks.forEach(task => {
-        const row = `<tr>
-            <td>${task.task_name}</td>
-            <td>${task.subject || "General"}</td>
-            <td>${task.deadline}</td>
-            <td><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
-        </tr>`;
-        tableBody.insertAdjacentHTML('beforeend', row);
-        
-        let subj = task.subject || "General";
-        currentSubjectData[subj] = (currentSubjectData[subj] || 0) + 1;
-    });
+        if (!name || !deadline) {
+            showStatus("⚠️ Please fill in Task Name and Deadline.", "warning");
+            return;
+        }
 
-    document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
-    updateChart(currentSubjectData);
-}
+        tasks.unshift({ name, subject, deadline, priority });
 
-function updateChart(data) {
-    const ctx = document.getElementById('subjectChart').getContext('2d');
-    if (myChart) myChart.destroy();
-    if (Object.keys(data).length === 0) return;
+        // Reset form
+        document.getElementById('task_name').value  = '';
+        document.getElementById('subject').value    = '';
+        document.getElementById('deadline').value   = '';
+        document.getElementById('priority').value   = 'Medium';
 
-    myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(data),
-            datasets: [{ 
-                data: Object.values(data), 
-                backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f', '#9b59b6'] 
-            }]
-        },
-        options: {
-            plugins: {
-                legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+        renderTable();
+        renderChart();
+        showStatus("✅ Task saved successfully!");
+    }
+
+    /* ────────────────────────────────
+       RENDER TABLE
+    ──────────────────────────────── */
+    function renderTable() {
+        const tbody = document.getElementById('taskTableBody');
+        document.getElementById('taskCounter').innerText = tasks.length + ' Task' + (tasks.length !== 1 ? 's' : '');
+
+        if (tasks.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4">
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    No tasks yet — add one to get started!
+                </div>
+            </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = tasks.map(t => `
+            <tr>
+                <td><strong>${t.name}</strong></td>
+                <td>${t.subject}</td>
+                <td>${t.deadline}</td>
+                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    /* ────────────────────────────────
+       PIE CHART
+    ──────────────────────────────── */
+    let myChart = null;
+
+    function renderChart() {
+        const canvas    = document.getElementById('subjectChart');
+        const emptyNote = document.getElementById('chartEmpty');
+
+        // Count tasks per subject
+        const subjectData = {};
+        tasks.forEach(t => {
+            subjectData[t.subject] = (subjectData[t.subject] || 0) + 1;
+        });
+
+        if (Object.keys(subjectData).length === 0) {
+            canvas.style.display = 'none';
+            emptyNote.style.display = 'block';
+            if (myChart) { myChart.destroy(); myChart = null; }
+            return;
+        }
+
+        canvas.style.display = 'block';
+        emptyNote.style.display = 'none';
+
+        if (myChart) myChart.destroy();
+
+        const COLORS = ['#7c3aed','#0ea5e9','#f43f5e','#22c55e','#f59e0b','#6366f1','#ec4899','#14b8a6'];
+
+        myChart = new Chart(canvas.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(subjectData),
+                datasets: [{
+                    data: Object.values(subjectData),
+                    backgroundColor: COLORS.slice(0, Object.keys(subjectData).length),
+                    borderWidth: 2,
+                    borderColor: 'rgba(255,255,255,0.15)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: getComputedStyle(document.body).getPropertyValue('color') || '#1e1b4b',
+                            font: { size: 12, family: 'Plus Jakarta Sans, Segoe UI, sans-serif' },
+                            padding: 10,
+                            boxWidth: 12,
+                            borderRadius: 4
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /* ────────────────────────────────
+       POMODORO TIMER
+    ──────────────────────────────── */
+    let timeLeft = 1500, timerId = null;
+
+    function toggleTimer() {
+        const btn = document.getElementById('timerBtn');
+        if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+            btn.innerText = 'Start';
+        } else {
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    timerId = null;
+                    btn.innerText = 'Start';
+                    timeLeft = 1500;
+                    updateTimerDisplay();
+                    showStatus("🎉 Time's up! Take a break.", "info");
+                }
+            }, 1000);
+            btn.innerText = 'Pause';
+        }
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    /* ────────────────────────────────
+       DARK MODE
+    ──────────────────────────────── */
+    function toggleDarkMode() {
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        if (myChart) renderChart(); // Refresh chart colors
+    }
+
+    /* ────────────────────────────────
+       FOCUS MODE
+    ──────────────────────────────── */
+    function toggleFocus() {
+        document.body.classList.toggle('focus-active');
+    }
+
+    /* ────────────────────────────────
+       ALLOW PRESSING ENTER IN FORM
+    ──────────────────────────────── */
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const active = document.activeElement;
+            if (['task_name','subject','deadline','priority'].includes(active.id)) {
+                saveTask();
             }
         }
     });
-}
 
-// 4. SAVE TASK
-document.getElementById('taskForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const taskData = {
-        task_name: document.getElementById('task_name').value,
-        subject: document.getElementById('subject').value || "General",
-        deadline: document.getElementById('deadline').value,
-        priority: document.getElementById('priority').value
-    };
-
-    const { error } = await _supabase.from('tasks').insert([taskData]);
-
-    if (error) {
-        showStatus("Save Error: " + error.message, "warning");
-    } else {
-        showStatus("Task saved successfully!", "success");
-        this.reset();
-        fetchTasks();
-    }
-});
-
-// 5. UTILITIES
-let timeLeft = 1500, timerId = null;
-function toggleTimer() {
-    if (timerId) { clearInterval(timerId); timerId = null; document.getElementById('timerBtn').innerText = "Start"; }
-    else { timerId = setInterval(() => { timeLeft--; updateTimerDisp(); if(timeLeft<=0) { clearInterval(timerId); showStatus("Time's up!", "info"); } }, 1000); document.getElementById('timerBtn').innerText = "Pause"; }
-}
-function updateTimerDisp() {
-    let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-    document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-}
-function toggleDarkMode() {
-    const body = document.body;
-    body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    if(myChart) fetchTasks(); 
-}
-function toggleFocus() { document.body.classList.toggle('focus-active'); }
-
-window.onload = fetchTasks;
+    /* ── Init ── */
+    renderChart();
 </script>
+
 </body>
 </html>
