@@ -143,12 +143,11 @@
 </div>
 
 <script>
-// 1. SUPABASE INITIALIZATION
-const supabaseUrl = 'https://lafiafbqccrojlkjgcvk.supabase.co';
+// 1. SUPABASE INITIALIZATION - Updated with your actual URL
+const supabaseUrl = 'https://hjdkiwuhclyohphtwwai.supabase.co';
 const supabaseKey = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Disable built-in alerts
 window.alert = function() {};
 
 // 2. SHOW STATUS MESSAGE
@@ -161,6 +160,17 @@ function showStatus(message, type = "info") {
 
 // 3. FETCH TASKS & UPDATE CHART
 let myChart = null;
+
+function addTaskRow(task) {
+    const tableBody = document.getElementById('taskTableBody');
+    const row = `<tr>
+        <td>${task.task_name}</td>
+        <td>${task.subject || "General"}</td>
+        <td>${task.deadline}</td>
+        <td><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
+    </tr>`;
+    tableBody.insertAdjacentHTML('beforeend', row);
+}
 
 async function fetchTasks() {
     const { data: tasks, error } = await _supabase
@@ -178,14 +188,7 @@ async function fetchTasks() {
     let currentSubjectData = {};
 
     tasks.forEach(task => {
-        const row = `<tr>
-            <td>${task.task_name}</td>
-            <td>${task.subject || "General"}</td>
-            <td>${task.deadline}</td>
-            <td><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
-        </tr>`;
-        tableBody.insertAdjacentHTML('beforeend', row);
-        
+        addTaskRow(task);
         let subj = task.subject || "General";
         currentSubjectData[subj] = (currentSubjectData[subj] || 0) + 1;
     });
@@ -197,8 +200,6 @@ async function fetchTasks() {
 function updateChart(data) {
     const ctx = document.getElementById('subjectChart').getContext('2d');
     if (myChart) myChart.destroy();
-    
-    // Check if there is actual data to show
     if (Object.keys(data).length === 0) return;
 
     myChart = new Chart(ctx, {
@@ -207,7 +208,7 @@ function updateChart(data) {
             labels: Object.keys(data),
             datasets: [{ 
                 data: Object.values(data), 
-                backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f', '#9b59b6'] 
+                backgroundColor: ['#6d28d9','#0ea5e9','#f43f5e','#10b981', '#f59e0b'] 
             }]
         },
         options: {
@@ -236,7 +237,7 @@ document.getElementById('taskForm').addEventListener('submit', async function(e)
     } else {
         showStatus("Task saved successfully!", "success");
         this.reset();
-        fetchTasks(); // This refreshes both the table and the chart
+        fetchTasks(); 
     }
 });
 
@@ -253,12 +254,11 @@ function updateTimerDisp() {
 function toggleDarkMode() {
     const body = document.body;
     body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    if(myChart) fetchTasks(); // Redraw chart for new theme colors
+    if(myChart) fetchTasks(); 
 }
 function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
-// Run on page load
-fetchTasks();
+window.onload = fetchTasks;
 </script>
 </body>
 </html>
