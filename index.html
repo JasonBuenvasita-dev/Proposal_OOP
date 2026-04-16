@@ -11,69 +11,107 @@
 
     <style>
         :root {
-            --bg-color: #f8f9ff;
+            --bg-color: radial-gradient(circle at top, #f8fcff 0%, #eef2ff 40%, #f9f0ff 100%);
             --text-color: #1f2937;
-            --card-bg: #ffffff;
-            --card-border: #e5e7eb;
-            --accent: #2563eb;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(99, 102, 241, 0.2);
+            --accent: #6d28d9;
+            --accent-alt: #0ea5e9;
+            --table-hover: rgba(79, 70, 229, 0.08);
         }
 
         [data-theme="dark"] {
-            --bg-color: #111827;
-            --text-color: #f3f4f6;
-            --card-bg: #1f2937;
-            --card-border: #374151;
+            --bg-color: radial-gradient(circle at top, #101827 0%, #0f172a 45%, #111827 100%);
+            --text-color: #e5e7eb;
+            --card-bg: rgba(30, 41, 59, 0.88);
+            --card-border: rgba(100, 116, 139, 0.28);
+            --accent: #94a3b8;
+            --accent-alt: #64748b;
+            --table-hover: rgba(100, 116, 139, 0.16);
         }
 
         body {
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             transition: 0.3s;
-            padding-top: 2rem;
+            min-height: 100vh;
+        }
+
+        .header-section {
+            background: linear-gradient(-45deg, #7c3aed, #0ea5e9, #f43f5e, #7c3aed);
+            background-size: 320% 320%;
+            animation: gradient 14s ease infinite;
+            color: white;
+            padding: 48px 32px;
+            text-align: center;
+            border-radius: 0 0 28px 28px;
+            box-shadow: 0 18px 45px rgba(79, 70, 229, 0.35);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .card {
             background-color: var(--card-bg);
+            border-radius: 18px;
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
             margin-bottom: 20px;
+            backdrop-filter: blur(8px);
         }
 
-        .btn-primary { background-color: #2563eb; border: none; }
-        .btn-success { background-color: #059669; border: none; }
-
-        .badge-high { background-color: #ef4444; }
-        .badge-medium { background-color: #f59e0b; }
-        .badge-low { background-color: #10b981; }
+        .badge-high { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+        .badge-medium { background: linear-gradient(135deg, #facc15, #f59e0b) !important; color: #111827 !important; }
+        .badge-low { background: linear-gradient(135deg, #22c55e, #16a34a) !important; }
 
         #statusMessage {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: none;
+            margin-bottom: 12px;
             border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            display: none;
         }
+
         .show-msg { display: block !important; }
+
+        .focus-active .header-section, .focus-active .col-md-4 { display: none; }
+        .focus-active .col-md-8 { width: 100%; }
     </style>
 </head>
 <body>
 
+<div class="header-section mb-4">
+    <h1>STUDY SMART</h1>
+    <p>Manage your Academic Deadlines Efficiently</p>
+    <div class="btn-group">
+        <button class="btn btn-outline-light btn-sm" onclick="toggleFocus()">Focus Mode</button>
+        <button class="btn btn-outline-light btn-sm" onclick="toggleDarkMode()">Dark Mode</button>
+    </div>
+</div>
+
 <div class="container">
-    <div id="statusMessage" class="alert shadow" role="status"></div>
+    <div id="statusMessage" class="alert" role="status"></div>
 
     <div class="row">
         <div class="col-md-4">
             <div class="card p-3 text-center">
-                <div class="mb-2">🍅 Pomodoro Timer</div>
-                <h2 id="timerDisplay" class="display-4 fw-bold">25:00</h2>
-                <button class="btn btn-primary w-100 py-2" onclick="toggleTimer()" id="timerBtn">Start</button>
+                <h6>🍅 Pomodoro Timer</h6>
+                <h2 id="timerDisplay">25:00</h2>
+                <button class="btn btn-primary btn-sm" onclick="toggleTimer()" id="timerBtn">Start</button>
+            </div>
+
+            <div class="card p-3">
+                <h6 class="text-center">📊 Subject Distribution</h6>
+                <canvas id="subjectChart"></canvas>
             </div>
 
             <div class="card p-4">
-                <h5 class="mb-3">Add New Task</h5>
+                <h5>Add New Task</h5>
                 <form id="taskForm">
                     <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" required>
                     <input type="text" id="subject" class="form-control mb-2" placeholder="Subject">
@@ -83,34 +121,22 @@
                         <option value="Medium" selected>Medium</option>
                         <option value="Low">Low</option>
                     </select>
-                    <button type="submit" class="btn btn-success w-100 py-2">Save Task</button>
+                    <button type="submit" class="btn btn-success w-100">Save Task</button>
                 </form>
-            </div>
-
-            <div class="card p-3">
-                <h6 class="text-center mb-3">📊 Subject Distribution</h6>
-                <canvas id="subjectChart"></canvas>
             </div>
         </div>
 
         <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold">Pending Tasks</h4>
-                <span class="badge bg-primary rounded-pill" id="taskCounter">0 Tasks</span>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5>Pending Tasks</h5>
+                <span class="badge bg-primary" id="taskCounter">0 Tasks</span>
             </div>
-            
-            <div class="card p-0 overflow-hidden">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Task</th>
-                            <th>Subject</th>
-                            <th>Deadline</th>
-                            <th class="pe-4">Priority</th>
-                        </tr>
+            <div class="card p-3">
+                <table class="table" style="color: inherit;">
+                    <thead>
+                        <tr><th>Task</th><th>Subject</th><th>Deadline</th><th>Priority</th></tr>
                     </thead>
-                    <tbody id="taskTableBody">
-                        </tbody>
+                    <tbody id="taskTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -118,83 +144,79 @@
 </div>
 
 <script>
-// Database Configuration
-const supabaseUrl = 'https://hjdkiwuhclyohphtwwai.supabase.co';
+// 1. SUPABASE INITIALIZATION
+const supabaseUrl = 'https://lafiafbqccrojlkjgcvk.supabase.co';
 const supabaseKey = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-let myChart = null;
+window.alert = function() {};
 
-// Notification System
-function showStatus(message, type = "success") {
+// 2. SHOW STATUS MESSAGE
+function showStatus(message, type = "info") {
     const box = document.getElementById('statusMessage');
-    box.className = `alert alert-${type} show-msg`;
+    box.className = `alert alert-${type === 'warning' ? 'danger' : type} show-msg`;
     box.innerText = message;
-    setTimeout(() => { box.classList.remove('show-msg'); }, 3000);
+    setTimeout(() => { box.classList.remove('show-msg'); }, 4000);
 }
 
-// Fetch and Sync Data
+// 3. FETCH TASKS & UPDATE CHART
+let myChart = null;
+
 async function fetchTasks() {
     const { data: tasks, error } = await _supabase
         .from('tasks')
         .select('*')
-        .order('deadline', { ascending: true });
+        .order('id', { ascending: false });
 
     if (error) {
-        showStatus("Sync Error: " + error.message, "danger");
+        showStatus("Could not sync with cloud", "warning");
         return;
     }
 
     const tableBody = document.getElementById('taskTableBody');
     tableBody.innerHTML = '';
-    let subjectCounts = {};
+    let currentSubjectData = {};
 
     tasks.forEach(task => {
-        // Build Table
         const row = `<tr>
-            <td class="ps-4">${task.task_name}</td>
+            <td>${task.task_name}</td>
             <td>${task.subject || "General"}</td>
             <td>${task.deadline}</td>
-            <td class="pe-4"><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
+            <td><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
         </tr>`;
         tableBody.insertAdjacentHTML('beforeend', row);
-
-        // Prep Chart Data
+        
         let subj = task.subject || "General";
-        subjectCounts[subj] = (subjectCounts[subj] || 0) + 1;
+        currentSubjectData[subj] = (currentSubjectData[subj] || 0) + 1;
     });
 
     document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
-    updateChart(subjectCounts);
+    updateChart(currentSubjectData);
 }
 
-// Render Pie Chart
 function updateChart(data) {
     const ctx = document.getElementById('subjectChart').getContext('2d');
     if (myChart) myChart.destroy();
-    
     if (Object.keys(data).length === 0) return;
 
     myChart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: Object.keys(data),
-            datasets: [{
-                data: Object.values(data),
-                backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
-                borderWidth: 2,
-                borderColor: getComputedStyle(document.body).getPropertyValue('--card-bg')
+            datasets: [{ 
+                data: Object.values(data), 
+                backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f', '#9b59b6'] 
             }]
         },
         options: {
             plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+                legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
             }
         }
     });
 }
 
-// Handle Form Submission
+// 4. SAVE TASK
 document.getElementById('taskForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -208,32 +230,30 @@ document.getElementById('taskForm').addEventListener('submit', async function(e)
     const { error } = await _supabase.from('tasks').insert([taskData]);
 
     if (error) {
-        showStatus("Error: " + error.message, "danger");
+        showStatus("Save Error: " + error.message, "warning");
     } else {
-        showStatus("Task saved to the cloud!");
+        showStatus("Task saved successfully!", "success");
         this.reset();
         fetchTasks();
     }
 });
 
-// Timer Logic
+// 5. UTILITIES
 let timeLeft = 1500, timerId = null;
 function toggleTimer() {
-    const btn = document.getElementById('timerBtn');
-    if (timerId) {
-        clearInterval(timerId);
-        timerId = null;
-        btn.innerText = "Start";
-    } else {
-        btn.innerText = "Pause";
-        timerId = setInterval(() => {
-            timeLeft--;
-            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if(timeLeft <= 0) { clearInterval(timerId); showStatus("Focus session complete!", "info"); }
-        }, 1000);
-    }
+    if (timerId) { clearInterval(timerId); timerId = null; document.getElementById('timerBtn').innerText = "Start"; }
+    else { timerId = setInterval(() => { timeLeft--; updateTimerDisp(); if(timeLeft<=0) { clearInterval(timerId); showStatus("Time's up!", "info"); } }, 1000); document.getElementById('timerBtn').innerText = "Pause"; }
 }
+function updateTimerDisp() {
+    let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+function toggleDarkMode() {
+    const body = document.body;
+    body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    if(myChart) fetchTasks(); 
+}
+function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
 window.onload = fetchTasks;
 </script>
