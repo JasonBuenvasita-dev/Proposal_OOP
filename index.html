@@ -254,9 +254,6 @@ function toggleDarkMode() {
     if(myChart) fetchTasks(); 
 }
 function toggleFocus() { document.body.classList.toggle('focus-active'); }
-let subjectData = {}  // Acts like a scoreboard, e.g. { "Math": 3, "Science": 1 }
-
-subjectData[subj] = (subjectData[subj] || 0) + 1
 
 window.onload = fetchTasks;
 </script>
