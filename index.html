@@ -150,6 +150,48 @@
             max-width: 110px;
             text-align: center;
         }
+
+        #statusMessage {
+            display: none;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        #statusMessage.info {
+            display: block;
+            background: rgba(14, 165, 233, 0.14);
+            color: #0c4a6e;
+        }
+
+        #statusMessage.success {
+            display: block;
+            background: rgba(34, 197, 94, 0.18);
+            color: #14532d;
+        }
+
+        #statusMessage.warning {
+            display: block;
+            background: rgba(245, 158, 11, 0.2);
+            color: #78350f;
+        }
+
+        [data-theme="dark"] #statusMessage.info {
+            background: rgba(14, 116, 144, 0.32);
+            color: #dbeafe;
+        }
+
+        [data-theme="dark"] #statusMessage.success {
+            background: rgba(21, 128, 61, 0.35);
+            color: #dcfce7;
+        }
+
+        [data-theme="dark"] #statusMessage.warning {
+            background: rgba(146, 64, 14, 0.35);
+            color: #ffedd5;
+        }
     </style>
 </head>
 <body>
@@ -164,6 +206,7 @@
 </div>
 
 <div class="container">
+    <div id="statusMessage" role="status" aria-live="polite"></div>
     <div class="row">
         <div class="col-md-4">
             <div class="card p-3 text-center">
@@ -224,6 +267,24 @@ const supabaseKey = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // 2. FETCH TASKS ON LOAD
+function showStatus(message, type = "info") {
+    const box = document.getElementById('statusMessage');
+    box.className = '';
+    box.classList.add(type);
+    box.innerText = message;
+}
+
+function addTaskRow(task, position = 'beforeend') {
+    const tableBody = document.getElementById('taskTableBody');
+    const row = `<tr>
+        <td>${task.task_name}</td>
+        <td>${task.subject || "General"}</td>
+        <td>${task.deadline}</td>
+        <td><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
+    </tr>`;
+    tableBody.insertAdjacentHTML(position, row);
+}
+
 async function fetchTasks() {
     const { data: tasks, error } = await _supabase
         .from('tasks')
@@ -232,28 +293,22 @@ async function fetchTasks() {
 
     if (error) {
         console.error("Fetch Error:", error);
-    } else if (tasks) {
-        const tableBody = document.getElementById('taskTableBody');
-        tableBody.innerHTML = '';
-        let currentSubjectData = {};
-
-        tasks.forEach(task => {
-            const row = `<tr>
-                <td>${task.task_name}</td>
-                <td>${task.subject}</td>
-                <td>${task.deadline}</td>
-                <td><span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span></td>
-            </tr>`;
-            tableBody.insertAdjacentHTML('beforeend', row);
-
-            // Collect data for chart
-            let subj = task.subject || "General";
-            currentSubjectData[subj] = (currentSubjectData[subj] || 0) + 1;
-        });
-
-        document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
-        updateChart(currentSubjectData);
+        showStatus("Unable to load tasks from cloud", "warning");
+        return;
     }
+
+    const tableBody = document.getElementById('taskTableBody');
+    tableBody.innerHTML = '';
+    let currentSubjectData = {};
+
+    tasks.forEach(task => {
+        addTaskRow(task);
+        let subj = task.subject || "General";
+        currentSubjectData[subj] = (currentSubjectData[subj] || 0) + 1;
+    });
+
+    document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
+    updateChart(currentSubjectData);
 }
 
 // 3. SAVE TASK
@@ -272,17 +327,22 @@ document.getElementById('taskForm').addEventListener('submit', async function(e)
 
     checkDeadline(name, date);
 
-    const { data, error } = await _supabase
+    const { error } = await _supabase
         .from('tasks')
         .insert([taskData]);
 
     if (error) {
-        alert("Error saving: " + error.message);
-    } else {
-        alert("Task saved to the cloud!");
-        this.reset();
-        fetchTasks();
+        showStatus("Save failed: " + error.message, "warning");
+        return;
     }
+
+    addTaskRow(taskData, 'afterbegin');
+    const counter = document.getElementById('taskCounter');
+    const currentCount = parseInt(counter.innerText, 10) || 0;
+    counter.innerText = `${currentCount + 1} Tasks`;
+    this.reset();
+    showStatus("Task saved", "success");
+    fetchTasks();
 });
 
 // 4. CHART LOGIC
@@ -316,7 +376,7 @@ function toggleTimer() {
             timerId = null;
             timeLeft = 0;
             document.getElementById('timerBtn').innerText = "Start";
-            alert("Timer complete");
+            showStatus("Timer complete", "info");
         }
         updateTimerDisp();
     }, 1000);
@@ -326,7 +386,7 @@ function toggleTimer() {
 function setTimerMinutes() {
     const value = parseInt(document.getElementById('timerMinutes').value, 10);
     if (Number.isNaN(value) || value < 1 || value > 180) {
-        alert("Enter a value from 1 to 180 minutes");
+        showStatus("Enter a value from 1 to 180 minutes", "warning");
         return;
     }
 
@@ -346,7 +406,7 @@ function updateTimerDisp() {
 }
 function checkDeadline(taskName, deadlineStr) {
     const diff = (new Date(deadlineStr) - new Date()) / (1000 * 60 * 60);
-    if (diff > 0 && diff <= 24) alert(`⚠️ URGENT: "${taskName}" is due soon!`);
+    if (diff > 0 && diff <= 24) showStatus(`Urgent: ${taskName} is due in less than 24 hours`, "warning");
 }
 function toggleDarkMode() {
     const body = document.body;
