@@ -71,7 +71,33 @@ async function saveTask() {
         fetchTasks();
     }
 }
+async function uploadImage(file) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
 
+    let { error: uploadError } = await db.storage
+        .from('task-images')
+        .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    // Get the public URL
+    const { data } = db.storage.from('task-images').getPublicUrl(filePath);
+    return data.publicUrl;
+}
+
+// Update your saveTask function to include this
+async function saveTask() {
+    const imageFile = document.getElementById('task_image').files[0];
+    let imageUrl = null;
+
+    if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+    }
+
+    // Now include imageUrl in your db.from('tasks').insert([...]) call
+}
 async function fetchTasks() {
     // Because of your RLS policy (auth.uid() = user_id), 
     // Supabase automatically only returns YOUR tasks.
