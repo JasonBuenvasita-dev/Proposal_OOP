@@ -6,7 +6,6 @@
     <title>StudySmart | Task Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -34,7 +33,6 @@
             --input-border: #2e2850;
             --shadow: 0 8px 32px rgba(0,0,0,0.35);
         }
-        * { box-sizing: border-box; }
         body {
             background: var(--bg);
             color: var(--text);
@@ -47,27 +45,17 @@
             background-size: 320% 320%;
             animation: gradientShift 14s ease infinite;
             color: white;
-            padding: 44px 32px 52px;
+            padding: 40px 20px;
             text-align: center;
             border-radius: 0 0 32px 32px;
             box-shadow: 0 16px 48px rgba(109,40,217,0.30);
-            position: relative;
-            overflow: hidden;
-        }
-        .header-section::before {
-            content:'';
-            position:absolute;
-            inset:0;
-            background:radial-gradient(ellipse at 30% 60%,rgba(255,255,255,0.08) 0%,transparent 60%);
-            pointer-events:none;
+            margin-bottom: 30px;
         }
         @keyframes gradientShift {
             0%   { background-position: 0% 50%; }
             50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        .header-section h1 { font-size:2.4rem; font-weight:700; letter-spacing:0.06em; margin-bottom:6px; }
-        .header-section p  { opacity:0.85; font-size:0.95rem; margin-bottom:20px; }
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -77,102 +65,51 @@
             margin-bottom: 18px;
             color: var(--text);
         }
-        .card h5, .card h6 { color:var(--text); font-weight:600; }
-        .timer-num { font-size:3rem; font-weight:700; letter-spacing:0.04em; color:var(--accent); }
+        .timer-num { font-size:3rem; font-weight:700; color:var(--accent); }
         .form-control, .form-select {
             background: var(--input-bg) !important;
             border: 1.5px solid var(--input-border) !important;
             color: var(--text) !important;
             border-radius: 10px !important;
-            font-size: 0.9rem;
-            padding: 9px 12px;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .form-control:focus, .form-select:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 3px rgba(124,58,237,0.12) !important;
-            outline: none;
-        }
-        .form-control::placeholder { color:var(--text-muted); opacity:0.7; }
         .btn-save {
             background: linear-gradient(135deg,var(--accent),var(--accent2));
             color: white; border: none; border-radius: 10px;
-            font-weight: 600; font-size: 0.9rem; padding: 10px;
-            width: 100%; cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
+            font-weight: 600; padding: 12px; width: 100%;
         }
-        .btn-save:hover  { opacity:0.92; transform:translateY(-1px); }
-        .btn-save:active { transform:scale(0.98); }
-        .btn-save:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-        .btn-outline-light { border-radius:8px; font-size:0.82rem; font-weight:500; }
-        .btn-primary {
-            background: linear-gradient(135deg,var(--accent),var(--accent2)) !important;
-            border: none !important; border-radius: 8px !important;
-            font-size: 0.82rem; font-weight: 500; transition: opacity 0.2s;
-        }
-        .btn-primary:hover { opacity:0.88 !important; }
-        .btn-delete {
-            background:none; border:none; color:#ef4444;
-            cursor:pointer; font-size:1rem; padding:2px 6px;
-            border-radius:6px; transition:background 0.15s;
-        }
-        .btn-delete:hover { background:rgba(239,68,68,0.1); }
         .table { color:var(--text); font-size:0.9rem; }
-        .table thead th {
-            color:var(--text-muted); font-weight:600; font-size:0.78rem;
-            text-transform:uppercase; letter-spacing:0.06em;
-            border-bottom:1.5px solid var(--card-border); padding-bottom:10px;
-        }
-        .table tbody tr td {
-            border-bottom:1px solid var(--card-border);
-            padding:10px 8px; vertical-align:middle;
-        }
-        .table tbody tr:last-child td { border-bottom:none; }
-        .table tbody tr:hover td { background:rgba(124,58,237,0.04); }
-        .badge-high   { background:linear-gradient(135deg,#ef4444,#dc2626); color:white; }
-        .badge-medium { background:linear-gradient(135deg,#f59e0b,#d97706); color:white; }
-        .badge-low    { background:linear-gradient(135deg,#22c55e,#16a34a); color:white; }
         .badge { border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; }
-        #statusMessage {
-            display:none; border-radius:12px; padding:10px 16px;
-            font-size:0.88rem; font-weight:600; margin-bottom:14px;
-        }
-        .show-msg { display:block !important; }
-        #taskCounter {
-            background:linear-gradient(135deg,var(--accent),var(--accent2));
-            border-radius:20px; padding:4px 14px; font-size:0.8rem; font-weight:600;
-        }
-        #syncStatus { font-size:0.75rem; padding:3px 10px; border-radius:20px; font-weight:500; }
-        .sync-ok      { background:rgba(34,197,94,0.15);  color:#16a34a; }
-        .sync-loading { background:rgba(14,165,233,0.15); color:#0369a1; }
-        .sync-error   { background:rgba(239,68,68,0.12);  color:#dc2626; }
-        .sync-local   { background:rgba(245,158,11,0.15); color:#b45309; }
-        .empty-state { text-align:center; padding:30px 16px; color:var(--text-muted); font-size:0.88rem; }
-        .empty-state .icon { font-size:2rem; margin-bottom:8px; }
-        .focus-active .header-section { display:none; }
-        .focus-active .left-col       { display:none; }
-        .focus-active .right-col      { width:100%; max-width:100%; flex:0 0 100%; }
-        ::-webkit-scrollbar { width:6px; }
-        ::-webkit-scrollbar-track { background:transparent; }
-        ::-webkit-scrollbar-thumb { background:var(--input-border); border-radius:10px; }
+        .badge-high { background: #ef4444; color: white; }
+        .badge-medium { background: #f59e0b; color: white; }
+        .badge-low { background: #22c55e; color: white; }
+        
+        #syncStatus { font-size:0.75rem; padding:3px 10px; border-radius:20px; }
+        .sync-ok { background:rgba(34,197,94,0.15); color:#16a34a; }
+        
+        /* Focus Mode Styles */
+        .focus-active .header-section, .focus-active .left-col { display:none; }
+        .focus-active .right-col { width:100%; flex:0 0 100%; }
+        .exit-focus { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .focus-active .exit-focus { display: block; }
     </style>
 </head>
 <body>
 
-<div class="header-section mb-4">
+<button class="btn btn-danger exit-focus shadow" onclick="toggleFocus()">❌ Exit Focus</button>
+
+<div class="header-section">
     <h1>📚 STUDY SMART</h1>
     <p>Manage your Academic Deadlines Efficiently</p>
-    <div class="btn-group gap-2">
-        <button class="btn btn-outline-light btn-sm" onclick="toggleFocus()">🎯 Focus Mode</button>
-        <button class="btn btn-outline-light btn-sm" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+        <button class="btn btn-outline-light btn-sm px-3" onclick="toggleFocus()">🎯 Focus Mode</button>
+        <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Dark Mode</button>
     </div>
 </div>
 
 <div class="container pb-5">
-    <div id="statusMessage" class="alert" role="status"></div>
+    <div id="statusMessage" class="alert d-none" role="status"></div>
     <div class="row">
 
-        <!-- LEFT -->
         <div class="col-md-4 left-col">
             <div class="card p-3 text-center">
                 <h6 class="mb-2">🍅 Pomodoro Timer</h6>
@@ -180,22 +117,11 @@
                 <button class="btn btn-primary btn-sm mt-2 px-4" onclick="toggleTimer()" id="timerBtn">Start</button>
             </div>
 
-            <div class="card p-3">
-                <h6 class="text-center mb-2">📊 Subject Distribution</h6>
-                <div style="position:relative; max-height:220px;">
-                    <canvas id="subjectChart"></canvas>
-                </div>
-                <p class="text-center mt-2 mb-0" id="chartEmpty"
-                   style="color:var(--text-muted); font-size:0.82rem; display:none;">
-                    Add tasks to see your chart
-                </p>
-            </div>
-
             <div class="card p-4">
                 <h5 class="mb-3">✏️ Add New Task</h5>
-                <input  type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
-                <input  type="text" id="subject"   class="form-control mb-2" placeholder="Subject (e.g. DBMS)" />
-                <input  type="date" id="deadline"  class="form-control mb-2" />
+                <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
+                <input type="text" id="subject" class="form-control mb-2" placeholder="Subject (e.g. DBMS)" />
+                <input type="date" id="deadline" class="form-control mb-2" />
                 <select id="priority" class="form-select mb-3">
                     <option value="High">🔴 High</option>
                     <option value="Medium" selected>🟡 Medium</option>
@@ -205,12 +131,11 @@
             </div>
         </div>
 
-        <!-- RIGHT -->
         <div class="col-md-8 right-col">
-            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                <h5 class="mb-0" style="font-weight:700;">Pending Tasks</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 fw-bold">Pending Tasks</h5>
                 <div class="d-flex align-items-center gap-2">
-                    <span id="syncStatus" class="sync-loading">⏳ Connecting...</span>
+                    <span id="syncStatus" class="sync-ok">☁️ Cloud Synced</span>
                     <span class="badge bg-primary" id="taskCounter">0 Tasks</span>
                 </div>
             </div>
@@ -219,14 +144,11 @@
                     <table class="table mb-0">
                         <thead>
                             <tr>
-                                <th>Task</th><th>Subject</th>
-                                <th>Deadline</th><th>Priority</th><th></th>
+                                <th>Task</th><th>Subject</th><th>Deadline</th><th>Priority</th><th></th>
                             </tr>
                         </thead>
                         <tbody id="taskTableBody">
-                            <tr><td colspan="5">
-                                <div class="empty-state"><div class="icon">⏳</div>Loading...</div>
-                            </td></tr>
+                            <tr><td colspan="5" class="text-center p-4 text-muted">Loading tasks...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -237,316 +159,91 @@
 </div>
 
 <script>
-    /* ═══════════════════════════════════════
-       SUPABASE CONFIG
-       Replace these if your key ever expires!
-    ═══════════════════════════════════════ */
     const SUPABASE_URL = 'https://lafiafbqccrojlkjgcvk.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    /* ── init client ── */
-    let db = null;
-    let useCloud = false;
-
-    try {
-        db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        useCloud = true;
-    } catch(e) {
-        console.warn('Supabase init failed, using local mode');
-    }
-
-    /* ── LOCAL fallback array ── */
-    let localTasks = [];
-    let nextLocalId = 1;
-
-    /* ═══════════════════════════════════════
-       STATUS HELPERS
-    ═══════════════════════════════════════ */
     function showStatus(message, type = "success") {
         const box = document.getElementById('statusMessage');
-        box.className = `alert alert-${type} show-msg`;
+        box.className = `alert alert-${type} d-block`;
         box.innerText = message;
-        setTimeout(() => box.classList.remove('show-msg'), 3500);
+        setTimeout(() => box.className = 'alert d-none', 3000);
     }
 
-    function setSyncStatus(state) {
-        const el = document.getElementById('syncStatus');
-        const map = {
-            ok:      ['sync-ok',      '☁️ Cloud Synced'],
-            loading: ['sync-loading', '⏳ Syncing...'],
-            error:   ['sync-error',   '⚠️ Cloud Error'],
-            local:   ['sync-local',   '💾 Local Mode']
-        };
-        el.className = map[state][0];
-        el.innerText = map[state][1];
-    }
-
-    /* ═══════════════════════════════════════
-       FETCH TASKS
-       Tries Supabase first → falls back to local
-    ═══════════════════════════════════════ */
     async function fetchTasks() {
-        setSyncStatus('loading');
-
-        if (useCloud && db) {
-            const { data, error } = await db
-                .from('tasks')
-                .select('*')
-                .order('id', { ascending: false });
-
-            if (!error && data) {
-                setSyncStatus('ok');
-                renderTable(data);
-                renderChart(data);
-                return;
-            }
-
-            /* Cloud failed — fall through to local */
-            console.warn('Supabase fetch error:', error?.message);
-            showStatus("⚠️ Cloud unavailable — showing local tasks.", "warning");
-        }
-
-        /* LOCAL MODE */
-        setSyncStatus('local');
-        renderTable(localTasks);
-        renderChart(localTasks);
+        const { data, error } = await db.from('tasks').select('*').order('deadline', { ascending: true });
+        if (error) return;
+        renderTable(data);
     }
 
-    /* ═══════════════════════════════════════
-       SAVE TASK
-       Tries Supabase first → saves locally if it fails
-    ═══════════════════════════════════════ */
     async function saveTask() {
-        const name     = document.getElementById('task_name').value.trim();
-        const subject  = document.getElementById('subject').value.trim() || 'General';
+        const name = document.getElementById('task_name').value;
+        const subject = document.getElementById('subject').value || 'General';
         const deadline = document.getElementById('deadline').value;
         const priority = document.getElementById('priority').value;
 
-        if (!name || !deadline) {
-            showStatus("⚠️ Please fill in Task Name and Deadline.", "warning");
-            return;
+        if (!name || !deadline) return showStatus("Fill in name and deadline", "warning");
+
+        const { error } = await db.from('tasks').insert([{ task_name: name, subject, deadline, priority }]);
+        if (!error) {
+            showStatus("Task saved!");
+            fetchTasks();
+            document.getElementById('task_name').value = '';
+            document.getElementById('deadline').value = '';
         }
-
-        const btn = document.getElementById('saveBtn');
-        btn.disabled = true;
-        btn.innerText = '⏳ Saving...';
-        setSyncStatus('loading');
-
-        let saved = false;
-
-        /* Try cloud */
-        if (useCloud && db) {
-            const { data, error } = await db.from('tasks').insert([{
-                task_name: name,
-                subject:   subject,
-                deadline:  deadline,
-                priority:  priority
-            }]).select();
-
-            if (!error) {
-                saved = true;
-                setSyncStatus('ok');
-                showStatus("✅ Task saved to cloud!");
-            } else {
-                console.warn('Supabase insert error:', error.message);
-            }
-        }
-
-        /* Fall back to local if cloud failed */
-        if (!saved) {
-            localTasks.unshift({
-                id:        nextLocalId++,
-                task_name: name,
-                subject:   subject,
-                deadline:  deadline,
-                priority:  priority
-            });
-            setSyncStatus('local');
-            showStatus("💾 Saved locally (cloud unavailable).", "warning");
-        }
-
-        /* Reset form */
-        document.getElementById('task_name').value = '';
-        document.getElementById('subject').value   = '';
-        document.getElementById('deadline').value  = '';
-        document.getElementById('priority').value  = 'Medium';
-
-        btn.disabled = false;
-        btn.innerText = 'Save Task';
-
-        fetchTasks(); /* refresh table + chart */
     }
 
-    /* ═══════════════════════════════════════
-       DELETE TASK
-    ═══════════════════════════════════════ */
-    async function deleteTask(id, isLocal) {
+    async function deleteTask(id) {
         if (!confirm('Delete this task?')) return;
-        setSyncStatus('loading');
-
-        if (!isLocal && useCloud && db) {
-            const { error } = await db.from('tasks').delete().eq('id', id);
-            if (error) {
-                setSyncStatus('error');
-                showStatus("❌ Delete failed: " + error.message, "danger");
-                return;
-            }
-            showStatus("🗑️ Task deleted from cloud.", "info");
-        } else {
-            localTasks = localTasks.filter(t => t.id !== id);
-            showStatus("🗑️ Task deleted.", "info");
-        }
-
+        await db.from('tasks').delete().eq('id', id);
         fetchTasks();
     }
 
-    /* ═══════════════════════════════════════
-       RENDER TABLE
-    ═══════════════════════════════════════ */
     function renderTable(tasks) {
         const tbody = document.getElementById('taskTableBody');
-        document.getElementById('taskCounter').innerText =
-            tasks.length + ' Task' + (tasks.length !== 1 ? 's' : '');
-
+        document.getElementById('taskCounter').innerText = tasks.length + ' Tasks';
+        
         if (tasks.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5">
-                <div class="empty-state"><div class="icon">📋</div>No tasks yet — add one!</div>
-            </td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4">No tasks found.</td></tr>`;
             return;
         }
-
-        const isLocal = !useCloud || document.getElementById('syncStatus').classList.contains('sync-local');
 
         tbody.innerHTML = tasks.map(t => `
             <tr>
                 <td><strong>${t.task_name}</strong></td>
-                <td>${t.subject || 'General'}</td>
+                <td>${t.subject}</td>
                 <td>${t.deadline}</td>
-                <td><span class="badge badge-${(t.priority || 'medium').toLowerCase()}">${t.priority}</span></td>
-                <td>
-                    <button class="btn-delete"
-                        onclick="deleteTask(${t.id}, ${isLocal})"
-                        title="Delete">🗑</button>
-                </td>
+                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
+                <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
             </tr>
         `).join('');
     }
 
-    /* ═══════════════════════════════════════
-       PIE CHART
-    ═══════════════════════════════════════ */
-    let myChart = null;
-
-    function renderChart(tasks) {
-        const canvas    = document.getElementById('subjectChart');
-        const emptyNote = document.getElementById('chartEmpty');
-
-        /* Count tasks per subject */
-        const counts = {};
-        tasks.forEach(t => {
-            const s = t.subject || 'General';
-            counts[s] = (counts[s] || 0) + 1;
-        });
-
-        if (Object.keys(counts).length === 0) {
-            canvas.style.display = 'none';
-            emptyNote.style.display = 'block';
-            if (myChart) { myChart.destroy(); myChart = null; }
-            return;
-        }
-
-        canvas.style.display = 'block';
-        emptyNote.style.display = 'none';
-        if (myChart) myChart.destroy();
-
-        const COLORS = [
-            '#7c3aed','#0ea5e9','#f43f5e',
-            '#22c55e','#f59e0b','#6366f1','#ec4899','#14b8a6'
-        ];
-
-        const labelColor = getComputedStyle(document.documentElement)
-                            .getPropertyValue('--text').trim() || '#1e1b4b';
-
-        myChart = new Chart(canvas.getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: Object.keys(counts),
-                datasets: [{
-                    data: Object.values(counts),
-                    backgroundColor: COLORS.slice(0, Object.keys(counts).length),
-                    borderWidth: 2,
-                    borderColor: 'rgba(255,255,255,0.15)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: labelColor,
-                            font: { size: 12, family: 'Plus Jakarta Sans, Segoe UI, sans-serif' },
-                            padding: 10, boxWidth: 12, borderRadius: 4
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    /* ═══════════════════════════════════════
-       POMODORO TIMER
-    ═══════════════════════════════════════ */
+    // Timer Logic
     let timeLeft = 1500, timerId = null;
-
     function toggleTimer() {
         const btn = document.getElementById('timerBtn');
         if (timerId) {
             clearInterval(timerId); timerId = null; btn.innerText = 'Start';
         } else {
+            btn.innerText = 'Pause';
             timerId = setInterval(() => {
                 timeLeft--;
                 const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-                document.getElementById('timerDisplay').innerText =
-                    `${m}:${s < 10 ? '0' : ''}${s}`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerId); timerId = null;
-                    btn.innerText = 'Start'; timeLeft = 1500;
-                    document.getElementById('timerDisplay').innerText = '25:00';
-                    showStatus("🎉 Time's up! Take a break.", "info");
-                }
+                document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                if (timeLeft <= 0) { clearInterval(timerId); timerId = null; alert("Break time!"); }
             }, 1000);
-            btn.innerText = 'Pause';
         }
     }
 
-    /* ═══════════════════════════════════════
-       DARK MODE + FOCUS MODE
-    ═══════════════════════════════════════ */
     function toggleDarkMode() {
         const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
         body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        /* Redraw chart so legend colour updates */
-        if (myChart) fetchTasks();
     }
 
     function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
-    /* ═══════════════════════════════════════
-       ENTER KEY TO SAVE
-    ═══════════════════════════════════════ */
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-            const id = document.activeElement.id;
-            if (['task_name','subject','deadline','priority'].includes(id)) saveTask();
-        }
-    });
-
-    /* ═══════════════════════════════════════
-       START
-    ═══════════════════════════════════════ */
     window.onload = fetchTasks;
 </script>
 </body>
