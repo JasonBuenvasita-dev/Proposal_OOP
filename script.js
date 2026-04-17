@@ -98,18 +98,23 @@ async function saveTask() {
 
     // Now include imageUrl in your db.from('tasks').insert([...]) call
 }
-async function fetchTasks() {
-    // Because of your RLS policy (auth.uid() = user_id), 
-    // Supabase automatically only returns YOUR tasks.
-    const { data, error } = await db
-        .from('tasks')
-        .select('*')
-        .order('deadline', { ascending: true });
+async function saveTask() {
+    const { data: { user } } = await db.auth.getUser();
+    
+    // ... (your existing image upload code) ...
 
-    if (error) {
-        console.error("Fetch Error:", error.message);
-    } else {
-        renderTable(data);
+    const { error } = await db.from('tasks').insert([{ 
+        task_name: name, 
+        subject, 
+        deadline, 
+        priority,
+        image_url: imageUrl,
+        user_id: user.id // <--- MAKE SURE THIS IS HERE
+    }]);
+
+    if (!error) {
+        fetchTasks();
+        // clear inputs...
     }
 }
 
