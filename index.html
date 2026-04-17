@@ -161,6 +161,7 @@
                                 <th>Subject</th>
                                 <th>Deadline</th>
                                 <th>Priority</th>
+                                <th>Action</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -276,21 +277,28 @@
         fetchTasks();
     }
 
-    function renderTable(tasks) {
-        const tbody = document.getElementById('taskTableBody');
-        document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
-        
-        tbody.innerHTML = tasks.map(t => `
+   function renderTable(tasks) {
+    const tbody = document.getElementById('taskTableBody');
+    
+    tbody.innerHTML = tasks.map(t => {
+        // 1. Check if the task has an image URL
+        // 2. We use 'object-fit: cover' so the image stays a perfect square
+        const taskImage = t.image_url 
+            ? `<img src="${t.image_url}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`
+            : `<span style="font-size: 24px; opacity: 0.5;">📄</span>`;
+
+        return `
             <tr>
-                <td>${t.image_url ? `<img src="${t.image_url}" class="task-img">` : '📄'}</td>
+                <td>${taskImage}</td>
                 <td><strong>${t.task_name}</strong></td>
                 <td>${t.subject}</td>
                 <td>${t.deadline}</td>
                 <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
                 <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
             </tr>
-        `).join('');
-    }
+        `;
+    }).join('');
+}
 
     function toggleDarkMode() {
         const body = document.body;
