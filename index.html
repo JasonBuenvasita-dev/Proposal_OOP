@@ -14,7 +14,6 @@
             --card-bg: rgba(255,255,255,0.95);
             --card-border: rgba(109,40,217,0.12);
             --text: #1e1b4b;
-            --text-muted: #6b7280;
             --accent: #7c3aed;
             --accent2: #0ea5e9;
             --input-bg: #f8f7ff;
@@ -28,20 +27,18 @@
             --card-bg: rgba(22,20,40,0.97);
             --card-border: rgba(139,92,246,0.18);
             --text: #ede9fe;
-            --text-muted: #9ca3af;
             --accent: #a78bfa;
             --accent2: #38bdf8;
             --input-bg: #1a1730;
             --input-border: #2e2850;
             --shadow: 0 8px 32px rgba(0,0,0,0.35);
-            --header-gradient: linear-gradient(-45deg, #1e1b4b, #312e81, #4338ca, #1e1b4b);
         }
 
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Plus Jakarta Sans','Segoe UI',sans-serif;
-            transition: background 0.3s, color 0.3s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: 0.3s;
             min-height: 100vh;
         }
 
@@ -50,20 +47,16 @@
             background-size: 320% 320%;
             animation: gradientShift 14s ease infinite;
             color: white;
-            padding: 20px 10px;
+            padding: 30px 10px;
             text-align: center;
             border-radius: 0 0 24px 24px;
             box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            transition: background 0.5s ease;
+            margin-bottom: 30px;
         }
 
-        .header-section h1 { font-size: 1.5rem; margin-bottom: 2px; font-weight: 700; letter-spacing: 1px; }
-        .header-section p { font-size: 0.85rem; opacity: 0.8; }
-
         @keyframes gradientShift {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
@@ -74,20 +67,10 @@
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
             margin-bottom: 18px;
-            color: var(--text);
         }
 
-        .timer-num { font-size: 2.5rem; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
-        .timer-input { 
-            width: 70px; 
-            text-align: center; 
-            border: 1px solid var(--input-border); 
-            border-radius: 8px;
-            background: var(--input-bg);
-            color: var(--text);
-            font-weight: 600;
-        }
-
+        .timer-num { font-size: 2.5rem; font-weight: 700; color: var(--accent); }
+        
         .form-control, .form-select {
             background: var(--input-bg) !important;
             border: 1.5px solid var(--input-border) !important;
@@ -101,37 +84,26 @@
             font-weight: 600; padding: 12px; width: 100%;
         }
 
-        .table { color:var(--text); font-size:0.9rem; }
-        .badge { border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; }
         .badge-high { background: #ef4444; color: white; }
         .badge-medium { background: #f59e0b; color: white; }
         .badge-low { background: #22c55e; color: white; }
         
-        #syncStatus { font-size:0.75rem; padding:3px 10px; border-radius:20px; }
-        .sync-ok { background:rgba(34,197,94,0.15); color:#16a34a; }
-        
-        .focus-active .header-section, .focus-active .left-col { display:none; }
-        .focus-active .right-col { width:100%; flex:0 0 100%; }
-        .exit-focus { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; }
-        .focus-active .exit-focus { display: block; }
+        .task-img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid var(--input-border); }
     </style>
 </head>
 <body>
 
-<button class="btn btn-danger exit-focus shadow" onclick="toggleFocus()">❌ Exit Focus</button>
-
 <div class="header-section" id="mainHeader">
     <h1>📚 STUDY SMART</h1>
-    <p>Manage your Academic Deadlines Efficiently</p>
+    <p>Efficient Academic Task Management</p>
     <div class="d-flex justify-content-center gap-2 mt-2">
-        <button class="btn btn-outline-light btn-sm px-3" onclick="toggleFocus()">🎯 Focus Mode</button>
         <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         <button class="btn btn-outline-light btn-sm px-3" id="logoutBtn" onclick="signOut()" style="display:none;">🚪 Logout</button>
     </div>
 </div>
 
 <div class="container pb-5">
-    <div id="statusMessage" class="alert d-none" role="status"></div>
+    <div id="statusMessage" class="alert d-none"></div>
 
     <div id="auth-section" class="row justify-content-center">
         <div class="col-md-4"> 
@@ -139,38 +111,32 @@
                 <h4 class="text-center mb-3 fw-bold" id="authTitle">Welcome Back</h4>
                 <input type="email" id="email" class="form-control mb-2" placeholder="Email Address">
                 <input type="password" id="password" class="form-control mb-3" placeholder="Password">
-                
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary fw-bold" id="authBtn" onclick="handleAuth()">Log In</button>
-                </div>
-
-                <p class="text-center mt-3 mb-0 small">
-                    <span id="authMsg" class="text-muted">New to StudySmart?</span> 
-                    <a href="javascript:void(0)" class="text-decoration-none fw-bold" onclick="toggleAuthMode()" id="toggleLink">Create Account</a>
+                <button class="btn btn-primary w-100 fw-bold" id="authBtn" onclick="handleAuth()">Log In</button>
+                <p class="text-center mt-3 small">
+                    <span id="authMsg">New to StudySmart?</span> 
+                    <a href="#" onclick="toggleAuthMode()" id="toggleLink">Create Account</a>
                 </p>
             </div>
         </div>
     </div>
+
     <div id="main-app" class="row d-none">
-        <div class="col-md-4 left-col">
-            <div class="card p-3 text-center">
-                <h6 class="mb-2">⏲️ Custom Timer</h6>
+        <div class="col-md-4">
+            <div class="card p-3 text-center mb-4">
+                <h6>⏲️ Timer</h6>
                 <div class="timer-num" id="timerDisplay">25:00</div>
-                <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-                    <span class="small text-muted">Set mins:</span>
-                    <input type="number" id="timerInput" class="timer-input" value="25" min="1" max="180">
-                </div>
-                <div class="d-flex justify-content-center gap-2">
-                    <button class="btn btn-primary btn-sm px-3" onclick="toggleTimer()" id="timerBtn">Start</button>
-                    <button class="btn btn-outline-secondary btn-sm px-3" onclick="resetTimer()">Reset</button>
-                </div>
+                <button class="btn btn-primary btn-sm mt-2" onclick="toggleTimer()" id="timerBtn">Start</button>
             </div>
 
             <div class="card p-4">
                 <h5 class="mb-3">✏️ Add New Task</h5>
                 <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
-                <input type="text" id="subject" class="form-control mb-2" placeholder="Subject (e.g. DBMS)" />
+                <input type="text" id="subject" class="form-control mb-2" placeholder="Subject" />
                 <input type="date" id="deadline" class="form-control mb-2" />
+                
+                <label class="small text-muted mb-1">Picture (Optional)</label>
+                <input type="file" id="task_image" class="form-control mb-2" accept="image/*" />
+
                 <select id="priority" class="form-select mb-3">
                     <option value="High">🔴 High</option>
                     <option value="Medium" selected>🟡 Medium</option>
@@ -180,78 +146,56 @@
             </div>
         </div>
 
-        <div class="col-md-8 right-col">
+        <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0 fw-bold">Pending Tasks</h5>
-                <div class="d-flex align-items-center gap-2">
-                    <span id="syncStatus" class="sync-ok">☁️ Cloud Synced</span>
-                    <span class="badge bg-primary" id="taskCounter">0 Tasks</span>
-                </div>
+                <h5 class="fw-bold">Pending Tasks</h5>
+                <span class="badge bg-primary" id="taskCounter">0 Tasks</span>
             </div>
             <div class="card p-3">
                 <div class="table-responsive">
-                    <table class="table mb-0">
+                    <table class="table align-middle">
                         <thead>
-                                <tr>
-                                    <th>Picture</th> <th>Task</th>
-                                    <th>Subject</th>
-                                    <th>Deadline</th>
-                                    <th>Priority</th>
-                                    <th></th>
-                                 </tr>
-                            </thead>
-                        <tbody id="taskTableBody">
-                            <tr><td colspan="5" class="text-center p-4 text-muted">Loading tasks...</td></tr>
-                        </tbody>
+                            <tr>
+                                <th>Pic</th>
+                                <th>Task</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Priority</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<label class="small text-muted mb-1">Attachment (Optional)</label>
-<input type="file" id="task_image" class="form-control mb-2" accept="image/*" />
+
 <script>
     const SUPABASE_URL = 'https://lafiafbqccrojlkjgcvk.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function showStatus(message, type = "success") {
+    let isLoginMode = true;
+
+    function showStatus(msg, type = "success") {
         const box = document.getElementById('statusMessage');
         box.className = `alert alert-${type} d-block`;
-        box.innerText = message;
+        box.innerText = msg;
         setTimeout(() => box.className = 'alert d-none', 3000);
     }
 
-    // --- START OF UPDATED AUTH LOGIC ---
-    let isLoginMode = true;
-
     function toggleAuthMode() {
         isLoginMode = !isLoginMode;
-        const title = document.getElementById('authTitle');
-        const btn = document.getElementById('authBtn');
-        const msg = document.getElementById('authMsg');
-        const link = document.getElementById('toggleLink');
-
-        if (isLoginMode) {
-            title.innerText = "Welcome Back";
-            btn.innerText = "Log In";
-            msg.innerText = "New to StudySmart?";
-            link.innerText = "Create Account";
-        } else {
-            title.innerText = "Join StudySmart";
-            btn.innerText = "Register Now";
-            msg.innerText = "Already have an account?";
-            link.innerText = "Log In";
-        }
+        document.getElementById('authTitle').innerText = isLoginMode ? "Welcome Back" : "Join StudySmart";
+        document.getElementById('authBtn').innerText = isLoginMode ? "Log In" : "Register Now";
+        document.getElementById('toggleLink').innerText = isLoginMode ? "Create Account" : "Log In";
     }
 
     async function handleAuth() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-
-        if (!email || !password) return showStatus("Enter email and password", "warning");
-
         if (isLoginMode) {
             const { error } = await db.auth.signInWithPassword({ email, password });
             if (error) showStatus(error.message, "danger");
@@ -259,17 +203,8 @@
         } else {
             const { error } = await db.auth.signUp({ email, password });
             if (error) showStatus(error.message, "danger");
-            else {
-                showStatus("Account created! You can now Log In.", "success");
-                toggleAuthMode();
-            }
+            else showStatus("Account created! Now Log In.");
         }
-    }
-    // --- END OF UPDATED AUTH LOGIC ---
-
-    async function signOut() {
-        await db.auth.signOut();
-        location.reload();
     }
 
     async function checkUser() {
@@ -282,10 +217,11 @@
         }
     }
 
+    async function signOut() { await db.auth.signOut(); location.reload(); }
+
     async function fetchTasks() {
         const { data, error } = await db.from('tasks').select('*').order('deadline', { ascending: true });
-        if (error) return;
-        renderTable(data);
+        if (!error) renderTable(data);
     }
 
     async function saveTask() {
@@ -294,44 +230,44 @@
         const subject = document.getElementById('subject').value || 'General';
         const deadline = document.getElementById('deadline').value;
         const priority = document.getElementById('priority').value;
+        const imageFile = document.getElementById('task_image').files[0];
 
-        if (!name || !deadline) return showStatus("Fill in name and deadline", "warning");
+        if (!name || !deadline) return showStatus("Name and Deadline required", "warning");
+
+        let imageUrl = null;
+        if (imageFile) {
+            const fileName = `${Date.now()}_${imageFile.name}`;
+            const { data, error: uploadError } = await db.storage.from('task-attachments').upload(fileName, imageFile);
+            if (!uploadError) {
+                const { data: urlData } = db.storage.from('task-attachments').getPublicUrl(fileName);
+                imageUrl = urlData.publicUrl;
+            }
+        }
 
         const { error } = await db.from('tasks').insert([{ 
-            task_name: name, 
-            subject, 
-            deadline, 
-            priority,
-            user_id: user.id 
+            task_name: name, subject, deadline, priority, user_id: user.id, image_url: imageUrl 
         }]);
 
         if (!error) {
             showStatus("Task saved!");
             fetchTasks();
             document.getElementById('task_name').value = '';
-            document.getElementById('deadline').value = '';
-        } else {
-            showStatus(error.message, "danger");
+            document.getElementById('task_image').value = '';
         }
     }
 
     async function deleteTask(id) {
-        if (!confirm('Delete this task?')) return;
         await db.from('tasks').delete().eq('id', id);
         fetchTasks();
     }
 
     function renderTable(tasks) {
         const tbody = document.getElementById('taskTableBody');
-        document.getElementById('taskCounter').innerText = tasks.length + ' Tasks';
+        document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
         
-        if (tasks.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4">No tasks found.</td></tr>`;
-            return;
-        }
-
         tbody.innerHTML = tasks.map(t => `
             <tr>
+                <td>${t.image_url ? `<img src="${t.image_url}" class="task-img">` : '📄'}</td>
                 <td><strong>${t.task_name}</strong></td>
                 <td>${t.subject}</td>
                 <td>${t.deadline}</td>
@@ -341,60 +277,10 @@
         `).join('');
     }
 
-    let timeLeft = 1500, timerId = null;
-
-    function toggleTimer() {
-        const btn = document.getElementById('timerBtn');
-        const input = document.getElementById('timerInput');
-        
-        if (timerId) {
-            clearInterval(timerId);
-            timerId = null;
-            btn.innerText = 'Start';
-            input.disabled = false;
-        } else {
-            if (timeLeft === 1500 || timeLeft === parseInt(input.value) * 60) {
-                timeLeft = parseInt(input.value) * 60;
-            }
-            input.disabled = true;
-            btn.innerText = 'Pause';
-            timerId = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 0) { 
-                    clearInterval(timerId); 
-                    timerId = null; 
-                    btn.innerText = 'Start';
-                    input.disabled = false;
-                    alert("Time is up!"); 
-                }
-            }, 1000);
-        }
-    }
-
-    function resetTimer() {
-        const input = document.getElementById('timerInput');
-        clearInterval(timerId);
-        timerId = null;
-        timeLeft = parseInt(input.value) * 60;
-        updateTimerDisplay();
-        document.getElementById('timerBtn').innerText = 'Start';
-        input.disabled = false;
-    }
-
-    function updateTimerDisplay() {
-        const m = Math.floor(timeLeft / 60);
-        const s = timeLeft % 60;
-        document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-
     function toggleDarkMode() {
         const body = document.body;
-        const currentTheme = body.getAttribute('data-theme');
-        body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
-
-    function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
     window.onload = checkUser;
 </script>
