@@ -86,7 +86,6 @@
         #syncStatus { font-size:0.75rem; padding:3px 10px; border-radius:20px; }
         .sync-ok { background:rgba(34,197,94,0.15); color:#16a34a; }
         
-        /* Focus Mode Styles */
         .focus-active .header-section, .focus-active .left-col { display:none; }
         .focus-active .right-col { width:100%; flex:0 0 100%; }
         .exit-focus { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; }
@@ -103,13 +102,28 @@
     <div class="d-flex justify-content-center gap-2 mt-3">
         <button class="btn btn-outline-light btn-sm px-3" onclick="toggleFocus()">🎯 Focus Mode</button>
         <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        <button class="btn btn-outline-light btn-sm px-3" id="logoutBtn" onclick="signOut()" style="display:none;">🚪 Logout</button>
     </div>
 </div>
 
 <div class="container pb-5">
     <div id="statusMessage" class="alert d-none" role="status"></div>
-    <div class="row">
 
+    <div id="auth-section" class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card p-4">
+                <h4 class="text-center mb-3">Login to StudySmart</h4>
+                <input type="email" id="email" class="form-control mb-2" placeholder="Email Address">
+                <input type="password" id="password" class="form-control mb-3" placeholder="Password">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="signIn()">Log In</button>
+                    <button class="btn btn-outline-secondary" onclick="signUp()">Create Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="row d-none">
         <div class="col-md-4 left-col">
             <div class="card p-3 text-center">
                 <h6 class="mb-2">🍅 Pomodoro Timer</h6>
@@ -154,7 +168,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -170,13 +183,48 @@
         setTimeout(() => box.className = 'alert d-none', 3000);
     }
 
+    // --- AUTH FUNCTIONS ---
+    async function signUp() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const { error } = await db.auth.signUp({ email, password });
+        if (error) showStatus(error.message, "danger");
+        else showStatus("Success! Check your email to confirm.", "success");
+    }
+
+    async function signIn() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const { error } = await db.auth.signInWithPassword({ email, password });
+        if (error) showStatus(error.message, "danger");
+        else checkUser();
+    }
+
+    async function signOut() {
+        await db.auth.signOut();
+        location.reload();
+    }
+
+    async function checkUser() {
+        const { data: { user } } = await db.auth.getUser();
+        if (user) {
+            document.getElementById('auth-section').classList.add('d-none');
+            document.getElementById('main-app').classList.remove('d-none');
+            document.getElementById('logoutBtn').style.display = 'block';
+            fetchTasks();
+        }
+    }
+
+    // --- TASK FUNCTIONS ---
     async function fetchTasks() {
+        // RLS policy auth.uid() = user_id automatically filters this
         const { data, error } = await db.from('tasks').select('*').order('deadline', { ascending: true });
         if (error) return;
         renderTable(data);
     }
 
     async function saveTask() {
+        const { data: { user } } = await db.auth.getUser();
         const name = document.getElementById('task_name').value;
         const subject = document.getElementById('subject').value || 'General';
         const deadline = document.getElementById('deadline').value;
@@ -184,12 +232,21 @@
 
         if (!name || !deadline) return showStatus("Fill in name and deadline", "warning");
 
-        const { error } = await db.from('tasks').insert([{ task_name: name, subject, deadline, priority }]);
+        const { error } = await db.from('tasks').insert([{ 
+            task_name: name, 
+            subject, 
+            deadline, 
+            priority,
+            user_id: user.id // Tagging the task with user ID
+        }]);
+
         if (!error) {
             showStatus("Task saved!");
             fetchTasks();
             document.getElementById('task_name').value = '';
             document.getElementById('deadline').value = '';
+        } else {
+            showStatus(error.message, "danger");
         }
     }
 
@@ -219,7 +276,7 @@
         `).join('');
     }
 
-    // Timer Logic
+    // Timer, Theme, and Focus logic (remains same)
     let timeLeft = 1500, timerId = null;
     function toggleTimer() {
         const btn = document.getElementById('timerBtn');
@@ -235,16 +292,13 @@
             }, 1000);
         }
     }
-
     function toggleDarkMode() {
         const body = document.body;
-        const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
-
     function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
-    window.onload = fetchTasks;
+    window.onload = checkUser;
 </script>
 </body>
 </html>
