@@ -162,7 +162,6 @@
                                 <th>Deadline</th>
                                 <th>Priority</th>
                                 <th>Action</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="taskTableBody"></tbody>
@@ -220,25 +219,17 @@
 
     async function signOut() { await db.auth.signOut(); location.reload(); }
 
-   async function fetchTasks() {
-    // 1. Get the current logged-in user
-    const { data: { user } } = await db.auth.getUser();
+    async function fetchTasks() {
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) return;
 
-    if (!user) return; // Don't fetch if no one is logged in
+        const { data, error } = await db.from('tasks')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('deadline', { ascending: true });
 
-    // 2. Only select rows where user_id matches the current user
-    const { data, error } = await db.from('tasks')
-        .select('*')
-        .eq('user_id', user.id) // <--- THIS IS THE KEY FIX
-        .order('deadline', { ascending: true });
-
-    if (error) {
-        console.error("Error fetching tasks:", error.message);
-        return;
+        if (!error) renderTable(data);
     }
-
-    renderTable(data);
-}
 
     async function saveTask() {
         const { data: { user } } = await db.auth.getUser();
@@ -277,33 +268,27 @@
         fetchTasks();
     }
 
-   function renderTable(tasks) {
-    const tbody = document.getElementById('taskTableBody');
-    
-    tbody.innerHTML = tasks.map(t => {
-        // 1. Check if the task has an image URL
-        // 2. We use 'object-fit: cover' so the image stays a perfect square
-        const taskImage = t.image_url 
-            ? `<img src="${t.image_url}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`
-            : `<span style="font-size: 24px; opacity: 0.5;">📄</span>`;
+    function renderTable(tasks) {
+        const tbody = document.getElementById('taskTableBody');
+        document.getElementById('taskCounter').innerText = `${tasks.length} Tasks`;
+        
+        tbody.innerHTML = tasks.map(t => {
+            const taskImage = t.image_url 
+                ? `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">` 
+                : '<span style="font-size:20px; opacity:0.5;">📄</span>';
 
-        return `
-            <tr>
-                // Replace the <td> row in your mapping function with this:
-<td>
-    ${t.image_url 
-        ? `<img src="${t.image_url}" class="task-img" style="width:45px; height:45px; object-fit:cover; border-radius:8px;">` 
-        : '<span style="font-size:20px;">📄</span>'}
-</td>
-                <td><strong>${t.task_name}</strong></td>
-                <td>${t.subject}</td>
-                <td>${t.deadline}</td>
-                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
-                <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
-            </tr>
-        `;
-    }).join('');
-}
+            return `
+                <tr>
+                    <td>${taskImage}</td>
+                    <td><strong>${t.task_name}</strong></td>
+                    <td>${t.subject}</td>
+                    <td>${t.deadline}</td>
+                    <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
+                    <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
 
     function toggleDarkMode() {
         const body = document.body;
