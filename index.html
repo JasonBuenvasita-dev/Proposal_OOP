@@ -20,7 +20,6 @@
             --input-bg: #f8f7ff;
             --input-border: #e0d9ff;
             --shadow: 0 8px 32px rgba(109,40,217,0.10);
-            /* Bright Header for Light Mode */
             --header-gradient: linear-gradient(-45deg,#7c3aed,#0ea5e9,#f43f5e,#7c3aed);
         }
 
@@ -35,7 +34,6 @@
             --input-bg: #1a1730;
             --input-border: #2e2850;
             --shadow: 0 8px 32px rgba(0,0,0,0.35);
-            /* Muted, Deeper Gradient for Dark Mode */
             --header-gradient: linear-gradient(-45deg, #1e1b4b, #312e81, #4338ca, #1e1b4b);
         }
 
@@ -136,19 +134,23 @@
     <div id="statusMessage" class="alert d-none" role="status"></div>
 
     <div id="auth-section" class="row justify-content-center">
-        <div class="col-md-5">
+        <div class="col-md-4"> 
             <div class="card p-4">
-                <h4 class="text-center mb-3">Login to StudySmart</h4>
+                <h4 class="text-center mb-3 fw-bold" id="authTitle">Welcome Back</h4>
                 <input type="email" id="email" class="form-control mb-2" placeholder="Email Address">
                 <input type="password" id="password" class="form-control mb-3" placeholder="Password">
+                
                 <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="signIn()">Log In</button>
-                    <button class="btn btn-outline-secondary" onclick="signUp()">Create Account</button>
+                    <button class="btn btn-primary fw-bold" id="authBtn" onclick="handleAuth()">Log In</button>
                 </div>
+
+                <p class="text-center mt-3 mb-0 small">
+                    <span id="authMsg" class="text-muted">New to StudySmart?</span> 
+                    <a href="javascript:void(0)" class="text-decoration-none fw-bold" onclick="toggleAuthMode()" id="toggleLink">Create Account</a>
+                </p>
             </div>
         </div>
     </div>
-
     <div id="main-app" class="row d-none">
         <div class="col-md-4 left-col">
             <div class="card p-3 text-center">
@@ -216,21 +218,49 @@
         setTimeout(() => box.className = 'alert d-none', 3000);
     }
 
-    async function signUp() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const { error } = await db.auth.signUp({ email, password });
-        if (error) showStatus(error.message, "danger");
-        else showStatus("Success! Check your email to confirm.", "success");
+    // --- START OF UPDATED AUTH LOGIC ---
+    let isLoginMode = true;
+
+    function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        const title = document.getElementById('authTitle');
+        const btn = document.getElementById('authBtn');
+        const msg = document.getElementById('authMsg');
+        const link = document.getElementById('toggleLink');
+
+        if (isLoginMode) {
+            title.innerText = "Welcome Back";
+            btn.innerText = "Log In";
+            msg.innerText = "New to StudySmart?";
+            link.innerText = "Create Account";
+        } else {
+            title.innerText = "Join StudySmart";
+            btn.innerText = "Register Now";
+            msg.innerText = "Already have an account?";
+            link.innerText = "Log In";
+        }
     }
 
-    async function signIn() {
+    async function handleAuth() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const { error } = await db.auth.signInWithPassword({ email, password });
-        if (error) showStatus(error.message, "danger");
-        else checkUser();
+
+        if (!email || !password) return showStatus("Enter email and password", "warning");
+
+        if (isLoginMode) {
+            const { error } = await db.auth.signInWithPassword({ email, password });
+            if (error) showStatus(error.message, "danger");
+            else checkUser();
+        } else {
+            const { error } = await db.auth.signUp({ email, password });
+            if (error) showStatus(error.message, "danger");
+            else {
+                showStatus("Account created! You can now Log In.", "success");
+                toggleAuthMode();
+            }
+        }
     }
+    // --- END OF UPDATED AUTH LOGIC ---
 
     async function signOut() {
         await db.auth.signOut();
