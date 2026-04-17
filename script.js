@@ -124,6 +124,8 @@ function renderTable(tasks) {
                 <td>${task.subject}</td>
                 <td>${task.deadline}</td>
                 <td><span class="badge bg-${task.priority === 'High' ? 'danger' : 'primary'}">${task.priority}</span></td>
+                // Inside your renderTable function
+                <td><img src="${t.image_url}" style="width:50px; border-radius:8px;"></td>
             </tr>
         `;
         tableBody.innerHTML += row;
