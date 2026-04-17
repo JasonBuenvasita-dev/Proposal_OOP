@@ -63,7 +63,7 @@ async function uploadFile(file) {
     const fileName = `${Date.now()}.${fileExt}`;
 
     let { error: uploadError } = await db.storage
-        .from('task-images') 
+        .from('task-images') // Ensure this matches your Supabase Dashboard name
         .upload(fileName, file);
 
     if (uploadError) throw uploadError;
@@ -85,9 +85,12 @@ async function saveTask() {
 
     if (!name || !deadline) return alert("Name and Deadline are required!");
 
-    let fileUrl = null;
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.innerText = "Saving...";
+    saveBtn.disabled = true;
 
     try {
+        let fileUrl = null;
         if (fileInput) {
             fileUrl = await uploadFile(fileInput);
         }
@@ -102,12 +105,19 @@ async function saveTask() {
         }]);
 
         if (error) throw error;
+        
         fetchTasks();
+        // Clear inputs
         document.getElementById('task_name').value = '';
+        document.getElementById('subject').value = '';
+        document.getElementById('deadline').value = '';
         document.getElementById('task_image').value = '';
 
     } catch (err) {
         alert("Error: " + err.message);
+    } finally {
+        saveBtn.innerText = "Save Task";
+        saveBtn.disabled = false;
     }
 }
 
@@ -133,11 +143,10 @@ function renderTable(tasks) {
     }
 
     tbody.innerHTML = tasks.map(t => {
-        let fileDisplay = '<span style="font-size:20px; opacity:0.5;">📄</span>';
+        let fileDisplay = '<span style="opacity:0.3;">📄</span>';
         
         if (t.image_url) {
             const url = t.image_url.toLowerCase();
-            // Check file type to show the right icon or image
             if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
                 fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
             } else if (url.endsWith('.pdf')) {
@@ -163,8 +172,44 @@ function renderTable(tasks) {
 }
 
 async function deleteTask(id) {
-    const { error } = await db.from('tasks').delete().eq('id', id);
-    if(!error) fetchTasks();
+    if(confirm("Delete this task?")) {
+        const { error } = await db.from('tasks').delete().eq('id', id);
+        if(!error) fetchTasks();
+    }
+}
+
+// 7. TIMER LOGIC
+let timer;
+let timeLeft = 1500; // 25 minutes
+let isRunning = false;
+
+function toggleTimer() {
+    const btn = document.getElementById('timerBtn');
+    if (isRunning) {
+        clearInterval(timer);
+        btn.innerText = "Start";
+    } else {
+        timer = setInterval(updateTimer, 1000);
+        btn.innerText = "Pause";
+    }
+    isRunning = !isRunning;
+}
+
+function updateTimer() {
+    if (timeLeft <= 0) {
+        clearInterval(timer);
+        alert("Time is up! Take a break.");
+        timeLeft = 1500;
+        document.getElementById('timerBtn').innerText = "Start";
+        isRunning = false;
+    } else {
+        timeLeft--;
+    }
+    
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    document.getElementById('timerDisplay').innerText = 
+        `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
 function toggleDarkMode() {
