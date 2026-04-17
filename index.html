@@ -289,7 +289,12 @@
 
         return `
             <tr>
-                <td>${taskImage}</td>
+                // Replace the <td> row in your mapping function with this:
+<td>
+    ${t.image_url 
+        ? `<img src="${t.image_url}" class="task-img" style="width:45px; height:45px; object-fit:cover; border-radius:8px;">` 
+        : '<span style="font-size:20px;">📄</span>'}
+</td>
                 <td><strong>${t.task_name}</strong></td>
                 <td>${t.subject}</td>
                 <td>${t.deadline}</td>
