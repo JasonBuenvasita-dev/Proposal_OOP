@@ -40,17 +40,21 @@
             transition: background 0.3s, color 0.3s;
             min-height: 100vh;
         }
+        /* SMALLER LOGO/HEADER SECTION */
         .header-section {
             background: linear-gradient(-45deg,#7c3aed,#0ea5e9,#f43f5e,#7c3aed);
             background-size: 320% 320%;
             animation: gradientShift 14s ease infinite;
             color: white;
-            padding: 40px 20px;
+            padding: 20px 10px; /* Reduced padding */
             text-align: center;
-            border-radius: 0 0 32px 32px;
-            box-shadow: 0 16px 48px rgba(109,40,217,0.30);
-            margin-bottom: 30px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 10px 30px rgba(109,40,217,0.20);
+            margin-bottom: 20px;
         }
+        .header-section h1 { font-size: 1.5rem; margin-bottom: 2px; } /* Smaller Title */
+        .header-section p { font-size: 0.85rem; opacity: 0.9; } /* Smaller Tagline */
+
         @keyframes gradientShift {
             0%   { background-position: 0% 50%; }
             50%  { background-position: 100% 50%; }
@@ -65,7 +69,18 @@
             margin-bottom: 18px;
             color: var(--text);
         }
-        .timer-num { font-size:3rem; font-weight:700; color:var(--accent); }
+        /* TIMER STYLES */
+        .timer-num { font-size: 2.5rem; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
+        .timer-input { 
+            width: 70px; 
+            text-align: center; 
+            border: 1px solid var(--input-border); 
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-weight: 600;
+        }
+
         .form-control, .form-select {
             background: var(--input-bg) !important;
             border: 1.5px solid var(--input-border) !important;
@@ -99,7 +114,7 @@
 <div class="header-section">
     <h1>📚 STUDY SMART</h1>
     <p>Manage your Academic Deadlines Efficiently</p>
-    <div class="d-flex justify-content-center gap-2 mt-3">
+    <div class="d-flex justify-content-center gap-2 mt-2">
         <button class="btn btn-outline-light btn-sm px-3" onclick="toggleFocus()">🎯 Focus Mode</button>
         <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         <button class="btn btn-outline-light btn-sm px-3" id="logoutBtn" onclick="signOut()" style="display:none;">🚪 Logout</button>
@@ -126,9 +141,16 @@
     <div id="main-app" class="row d-none">
         <div class="col-md-4 left-col">
             <div class="card p-3 text-center">
-                <h6 class="mb-2">🍅 Pomodoro Timer</h6>
+                <h6 class="mb-2">⏲️ Custom Timer</h6>
                 <div class="timer-num" id="timerDisplay">25:00</div>
-                <button class="btn btn-primary btn-sm mt-2 px-4" onclick="toggleTimer()" id="timerBtn">Start</button>
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                    <span class="small text-muted">Set mins:</span>
+                    <input type="number" id="timerInput" class="timer-input" value="25" min="1" max="180">
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-primary btn-sm px-3" onclick="toggleTimer()" id="timerBtn">Start</button>
+                    <button class="btn btn-outline-secondary btn-sm px-3" onclick="resetTimer()">Reset</button>
+                </div>
             </div>
 
             <div class="card p-4">
@@ -217,7 +239,6 @@
 
     // --- TASK FUNCTIONS ---
     async function fetchTasks() {
-        // RLS policy auth.uid() = user_id automatically filters this
         const { data, error } = await db.from('tasks').select('*').order('deadline', { ascending: true });
         if (error) return;
         renderTable(data);
@@ -237,7 +258,7 @@
             subject, 
             deadline, 
             priority,
-            user_id: user.id // Tagging the task with user ID
+            user_id: user.id 
         }]);
 
         if (!error) {
@@ -276,26 +297,61 @@
         `).join('');
     }
 
-    // Timer, Theme, and Focus logic (remains same)
+    // --- ENHANCED TIMER LOGIC ---
     let timeLeft = 1500, timerId = null;
+
     function toggleTimer() {
         const btn = document.getElementById('timerBtn');
+        const input = document.getElementById('timerInput');
+        
         if (timerId) {
-            clearInterval(timerId); timerId = null; btn.innerText = 'Start';
+            clearInterval(timerId);
+            timerId = null;
+            btn.innerText = 'Start';
+            input.disabled = false;
         } else {
+            // If starting fresh (or after reset), pull minutes from input
+            if (timeLeft === 1500 || timeLeft === parseInt(input.value) * 60) {
+                timeLeft = parseInt(input.value) * 60;
+            }
+            
+            input.disabled = true;
             btn.innerText = 'Pause';
             timerId = setInterval(() => {
                 timeLeft--;
-                const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-                document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                if (timeLeft <= 0) { clearInterval(timerId); timerId = null; alert("Break time!"); }
+                updateTimerDisplay();
+                if (timeLeft <= 0) { 
+                    clearInterval(timerId); 
+                    timerId = null; 
+                    btn.innerText = 'Start';
+                    input.disabled = false;
+                    alert("Time is up!"); 
+                }
             }, 1000);
         }
     }
+
+    function resetTimer() {
+        const input = document.getElementById('timerInput');
+        clearInterval(timerId);
+        timerId = null;
+        timeLeft = parseInt(input.value) * 60;
+        updateTimerDisplay();
+        document.getElementById('timerBtn').innerText = 'Start';
+        input.disabled = false;
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
     function toggleDarkMode() {
         const body = document.body;
         body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
+
     function toggleFocus() { document.body.classList.toggle('focus-active'); }
 
     window.onload = checkUser;
