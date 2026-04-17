@@ -114,23 +114,31 @@ async function fetchTasks() {
 }
 
 function renderTable(tasks) {
-    const tableBody = document.getElementById('taskTableBody');
-    tableBody.innerHTML = ''; // Clear current list
+    const tbody = document.getElementById('taskTableBody');
+    document.getElementById('taskCounter').innerText = tasks.length + ' Tasks';
+    
+    if (tasks.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-4">No tasks found.</td></tr>`;
+        return;
+    }
 
-    tasks.forEach(task => {
-        const row = `
+    tbody.innerHTML = tasks.map(t => {
+        // Handle optional picture: if t.image_url is null, show a placeholder
+        const imgTag = t.image_url 
+            ? `<img src="${t.image_url}" style="width:40px; height:40px; object-fit:cover; border-radius:8px;">`
+            : `<span class="text-muted small">No Image</span>`;
+
+        return `
             <tr>
-                <td>${task.task_name}</td>
-                <td>${task.subject}</td>
-                <td>${task.deadline}</td>
-                <td><span class="badge bg-${task.priority === 'High' ? 'danger' : 'primary'}">${task.priority}</span></td>
-                // Inside your renderTable function
-                <td><img src="${t.image_url}" style="width:50px; border-radius:8px;"></td>
+                <td>${imgTag}</td>
+                <td><strong>${t.task_name}</strong></td>
+                <td>${t.subject}</td>
+                <td>${t.deadline}</td>
+                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
+                <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
             </tr>
         `;
-        tableBody.innerHTML += row;
-    });
+    }).join('');
 }
-
 // Run on page load
 checkUserSession();
