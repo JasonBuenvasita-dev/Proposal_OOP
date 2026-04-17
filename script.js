@@ -133,10 +133,11 @@ function renderTable(tasks) {
     }
 
     tbody.innerHTML = tasks.map(t => {
-        let fileDisplay = '<span class="text-muted small">No File</span>';
+        let fileDisplay = '<span style="font-size:20px; opacity:0.5;">📄</span>';
         
         if (t.image_url) {
             const url = t.image_url.toLowerCase();
+            // Decide icon based on file extension
             if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
                 fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
             } else if (url.endsWith('.pdf')) {
