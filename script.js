@@ -4,11 +4,27 @@ const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 2. AUTHENTICATION LOGIC
+function toggleAuthMode() {
+    const title = document.getElementById('authTitle');
+    const btn = document.getElementById('authBtn');
+    const link = document.getElementById('toggleLink');
+    if (btn.innerText === "Log In") {
+        title.innerText = "Join StudySmart";
+        btn.innerText = "Register Now";
+        btn.setAttribute("onclick", "signUp()");
+        link.innerText = "Log In";
+    } else {
+        title.innerText = "Welcome Back";
+        btn.innerText = "Log In";
+        btn.setAttribute("onclick", "signIn()");
+        link.innerText = "Create Account";
+    }
+}
+
 async function signUp() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const { data, error } = await db.auth.signUp({ email, password });
-    
+    const { error } = await db.auth.signUp({ email, password });
     if (error) alert("Error: " + error.message);
     else alert("Success! Please check your email for a confirmation link.");
 }
@@ -16,14 +32,9 @@ async function signUp() {
 async function signIn() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const { data, error } = await db.auth.signInWithPassword({ email, password });
-
-    if (error) {
-        alert("Login failed: " + error.message);
-    } else {
-        alert("Welcome back!");
-        checkUserSession(); 
-    }
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    if (error) alert("Login failed: " + error.message);
+    else checkUserSession();
 }
 
 async function signOut() {
@@ -34,76 +45,68 @@ async function signOut() {
 // 3. SESSION CHECK
 async function checkUserSession() {
     const { data: { user } } = await db.auth.getUser();
-    const loginBox = document.getElementById('auth-section'); // Matches your HTML
+    const loginBox = document.getElementById('auth-section');
     const appBox = document.getElementById('main-app');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     if (user) {
         if(loginBox) loginBox.classList.add('d-none');
         if(appBox) appBox.classList.remove('d-none');
+        if(logoutBtn) logoutBtn.style.display = 'block';
         fetchTasks();
     }
 }
 
-// 4. IMAGE UPLOAD HELPER
-async function uploadImage(file) {
+// 4. UNIVERSAL FILE UPLOAD
+async function uploadFile(file) {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
 
-    // IMPORTANT: Make sure your bucket name is 'task-images' in Supabase
     let { error: uploadError } = await db.storage
         .from('task-images') 
-        .upload(filePath, file);
+        .upload(fileName, file);
 
     if (uploadError) throw uploadError;
 
-    const { data } = db.storage.from('task-images').getPublicUrl(filePath);
+    const { data } = db.storage.from('task-images').getPublicUrl(fileName);
     return data.publicUrl;
 }
 
-// 5. CONSOLIDATED SAVE TASK
+// 5. SAVE TASK
 async function saveTask() {
     const { data: { user } } = await db.auth.getUser();
     if (!user) return alert("Please log in first!");
 
-    // Get input values
     const name = document.getElementById('task_name').value;
     const subject = document.getElementById('subject').value;
     const deadline = document.getElementById('deadline').value;
     const priority = document.getElementById('priority').value;
-    const imageFile = document.getElementById('task_image').files[0];
+    const fileInput = document.getElementById('task_image').files[0];
 
     if (!name || !deadline) return alert("Name and Deadline are required!");
 
-    let imageUrl = null;
+    let fileUrl = null;
 
     try {
-        // Handle Image if exists
-        if (imageFile) {
-            imageUrl = await uploadImage(imageFile);
+        if (fileInput) {
+            fileUrl = await uploadFile(fileInput);
         }
 
-        // Insert into Database
         const { error } = await db.from('tasks').insert([{ 
             task_name: name, 
             subject: subject, 
             deadline: deadline, 
             priority: priority,
-            image_url: imageUrl,
+            image_url: fileUrl,
             user_id: user.id 
         }]);
 
         if (error) throw error;
-
-        alert("Task saved!");
         fetchTasks();
-        
-        // Clear inputs
         document.getElementById('task_name').value = '';
         document.getElementById('task_image').value = '';
 
     } catch (err) {
-        console.error("Operation failed:", err.message);
         alert("Error: " + err.message);
     }
 }
@@ -130,13 +133,24 @@ function renderTable(tasks) {
     }
 
     tbody.innerHTML = tasks.map(t => {
-        const imgTag = t.image_url 
-            ? `<img src="${t.image_url}" style="width:40px; height:40px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`
-            : `<span class="text-muted small">No Image</span>`;
+        let fileDisplay = '<span class="text-muted small">No File</span>';
+        
+        if (t.image_url) {
+            const url = t.image_url.toLowerCase();
+            if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+                fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
+            } else if (url.endsWith('.pdf')) {
+                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📕</span>`;
+            } else if (url.includes('.doc')) {
+                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📘</span>`;
+            } else {
+                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📁</span>`;
+            }
+        }
 
         return `
             <tr>
-                <td>${imgTag}</td>
+                <td>${fileDisplay}</td>
                 <td><strong>${t.task_name}</strong></td>
                 <td>${t.subject}</td>
                 <td>${t.deadline}</td>
@@ -150,6 +164,11 @@ function renderTable(tasks) {
 async function deleteTask(id) {
     const { error } = await db.from('tasks').delete().eq('id', id);
     if(!error) fetchTasks();
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
 window.onload = checkUserSession;
