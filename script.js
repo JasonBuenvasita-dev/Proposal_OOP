@@ -137,7 +137,7 @@ function renderTable(tasks) {
         
         if (t.image_url) {
             const url = t.image_url.toLowerCase();
-            // Decide icon based on file extension
+            // Check file type to show the right icon or image
             if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
                 fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
             } else if (url.endsWith('.pdf')) {
