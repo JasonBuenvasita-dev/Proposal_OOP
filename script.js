@@ -22,21 +22,20 @@ async function signIn() {
         alert("Login failed: " + error.message);
     } else {
         alert("Welcome back!");
-        checkUserSession(); // Update UI to show tasks
+        checkUserSession(); 
     }
 }
 
 async function signOut() {
     await db.auth.signOut();
-    location.reload(); // Refresh to hide private data
+    location.reload();
 }
 
-// 3. CHECK SESSION
-// Automatically hide login form and show tasks if already logged in
+// 3. SESSION CHECK
 async function checkUserSession() {
     const { data: { user } } = await db.auth.getUser();
-    const loginBox = document.getElementById('login-container');
-    const appBox = document.getElementById('main-app'); // Ensure your main UI has this ID
+    const loginBox = document.getElementById('auth-section'); // Matches your HTML
+    const appBox = document.getElementById('main-app');
 
     if (user) {
         if(loginBox) loginBox.classList.add('d-none');
@@ -45,92 +44,94 @@ async function checkUserSession() {
     }
 }
 
-// 4. TASK MANAGEMENT (CRUD)
-async function saveTask() {
-    const { data: { user } } = await db.auth.getUser();
-
-    if (!user) {
-        alert("You must be logged in!");
-        return;
-    }
-
-    const taskData = {
-        task_name: document.getElementById('taskName').value,
-        subject: document.getElementById('subject').value,
-        deadline: document.getElementById('deadline').value,
-        priority: document.getElementById('priority').value,
-        user_id: user.id // Links task to the logged-in account
-    };
-
-    const { error } = await db.from('tasks').insert([taskData]);
-
-    if (error) {
-        console.error("Save Error:", error.message);
-    } else {
-        alert("Task saved successfully!");
-        fetchTasks();
-    }
-}
+// 4. IMAGE UPLOAD HELPER
 async function uploadImage(file) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
+    // IMPORTANT: Make sure your bucket name is 'task-images' in Supabase
     let { error: uploadError } = await db.storage
-        .from('task-images')
+        .from('task-images') 
         .upload(filePath, file);
 
     if (uploadError) throw uploadError;
 
-    // Get the public URL
     const { data } = db.storage.from('task-images').getPublicUrl(filePath);
     return data.publicUrl;
 }
 
-// Update your saveTask function to include this
-async function saveTask() {
-    const imageFile = document.getElementById('task_image').files[0];
-    let imageUrl = null;
-
-    if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
-    }
-
-    // Now include imageUrl in your db.from('tasks').insert([...]) call
-}
+// 5. CONSOLIDATED SAVE TASK
 async function saveTask() {
     const { data: { user } } = await db.auth.getUser();
-    
-    // ... (your existing image upload code) ...
+    if (!user) return alert("Please log in first!");
 
-    const { error } = await db.from('tasks').insert([{ 
-        task_name: name, 
-        subject, 
-        deadline, 
-        priority,
-        image_url: imageUrl,
-        user_id: user.id // <--- MAKE SURE THIS IS HERE
-    }]);
+    // Get input values
+    const name = document.getElementById('task_name').value;
+    const subject = document.getElementById('subject').value;
+    const deadline = document.getElementById('deadline').value;
+    const priority = document.getElementById('priority').value;
+    const imageFile = document.getElementById('task_image').files[0];
 
-    if (!error) {
+    if (!name || !deadline) return alert("Name and Deadline are required!");
+
+    let imageUrl = null;
+
+    try {
+        // Handle Image if exists
+        if (imageFile) {
+            imageUrl = await uploadImage(imageFile);
+        }
+
+        // Insert into Database
+        const { error } = await db.from('tasks').insert([{ 
+            task_name: name, 
+            subject: subject, 
+            deadline: deadline, 
+            priority: priority,
+            image_url: imageUrl,
+            user_id: user.id 
+        }]);
+
+        if (error) throw error;
+
+        alert("Task saved!");
         fetchTasks();
-        // clear inputs...
+        
+        // Clear inputs
+        document.getElementById('task_name').value = '';
+        document.getElementById('task_image').value = '';
+
+    } catch (err) {
+        console.error("Operation failed:", err.message);
+        alert("Error: " + err.message);
     }
+}
+
+// 6. RENDER AND FETCH
+async function fetchTasks() {
+    const { data: { user } } = await db.auth.getUser();
+    const { data, error } = await db.from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('deadline', { ascending: true });
+
+    if (!error) renderTable(data);
 }
 
 function renderTable(tasks) {
     const tbody = document.getElementById('taskTableBody');
-    document.getElementById('taskCounter').innerText = tasks.length + ' Tasks';
+    const counter = document.getElementById('taskCounter');
+    if(counter) counter.innerText = tasks.length + ' Tasks';
     
-    if (tasks.length === 0) {
+    if (!tasks || tasks.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center p-4">No tasks found.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = tasks.map(t => {
-        // Handle optional picture: if t.image_url is null, show a placeholder
         const imgTag = t.image_url 
-            ? `<img src="${t.image_url}" style="width:40px; height:40px; object-fit:cover; border-radius:8px;">`
+            ? `<img src="${t.image_url}" style="width:40px; height:40px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`
             : `<span class="text-muted small">No Image</span>`;
 
         return `
@@ -145,5 +146,10 @@ function renderTable(tasks) {
         `;
     }).join('');
 }
-// Run on page load
-checkUserSession();
+
+async function deleteTask(id) {
+    const { error } = await db.from('tasks').delete().eq('id', id);
+    if(!error) fetchTasks();
+}
+
+window.onload = checkUserSession;
