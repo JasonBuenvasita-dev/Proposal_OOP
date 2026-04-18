@@ -15,39 +15,53 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 * **Purpose:** These lines establish a secure tunnel between your web app and the Supabase servers.
 * **The Logic:** `createClient` initializes the library, allowing us to use the `db` variable to perform tasks like logging in or saving data later in the script.
 
-### 2. Authentication Logic (Security)
-* **`toggleAuthMode()`**: This manages the **UI State**. It switches the text on the screen between "Log In" and "Register," effectively turning one form into two different tools.
-* **`signUp()` / `signIn()`**: These are `async` (asynchronous) functions. They send the email and password to Supabase. We use `await` to tell the browser: *"Wait for the server to verify these credentials before moving to the next line."*
-* **`signOut()`**: Clears the user's session and reloads the page to ensure all private data is wiped from the current view.
+2. Authentication Logic (The "Security Gate")
+JavaScript
+async function signIn() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    if (error) alert(error.message); else checkUserSession();
+}
+Purpose: To verify user credentials against the database.
 
-### 3. Session Management (Persistence)
-* **`checkUserSession()`**: This is the "Gatekeeper" function. 
-* **The Logic:** It asks Supabase, *"Is anyone already logged in on this computer?"* If a user is found, it uses `classList` to hide the login box and show the actual Task Manager. This is why you don't have to log in every time you refresh the page.
+The Logic: It uses await because talking to the cloud isn't instant. The script "waits" for Supabase to check the email and password before deciding whether to show an error or let the user in.
 
-### 4. File Upload System (Cloud Storage)
-* **`uploadFile(file)`**: 
-    * It extracts the file extension (e.g., `.pdf`).
-    * It renames the file using `Date.now()` (e.g., `1713456000.pdf`). This is a **Collision Prevention** strategy—it ensures that if two students upload "Homework.pdf," they won't overwrite each other.
-    * It returns a **Public URL**, which is the web link to that specific file in the cloud.
+3. Universal File Upload (The "Storage Bridge")
+JavaScript
+async function uploadFile(file) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    let { error } = await db.storage.from('task-images').upload(fileName, file);
+    const { data } = db.storage.from('task-images').getPublicUrl(fileName);
+    return data.publicUrl;
+}
+Purpose: To move physical files (images/PDFs) from your computer to cloud storage.
 
-### 5. Task CRUD: Save Operation
-* **`saveTask()`**: This is the most complex part of the engine.
-    1.  **Validation:** Checks if the user filled in the Name and Deadline. If not, it stops execution with an `alert`.
-    2.  **UI Feedback:** Changes the button text to "Saving..." and disables it. This prevents the user from clicking 10 times and creating duplicate tasks.
-    3.  **Two-Phase Commit:** It uploads the file *first* to get the link, then inserts the task text *second* into the database.
+The Logic: It implements Collision Prevention by using Date.now(). By renaming every file to a unique timestamp, it ensures that two users never overwrite each other's files.
 
-### 6. Data Retrieval & Rendering
-* **`fetchTasks()`**: 
-    * Uses `.eq('user_id', user.id)`: This is **Row-Level Security**. It ensures Student A can only see Student A's tasks.
-    * Uses `.order('deadline', { ascending: true })`: Automatically sorts the list so your most urgent homework appears at the top.
-* **`renderTable(tasks)`**: 
-    * This function uses **Polymorphic Rendering**. It looks at the file extension and decides what icon to show: 📕 for PDF, 📘 for Word, or an actual image preview for photos.
-    * It uses `.map().join('')` to transform raw database data into clean HTML rows efficiently.
+4. Dynamic UI Rendering (The "Artist")
+JavaScript
+function renderTable(tasks) {
+    tbody.innerHTML = tasks.map(t => {
+        // ... HTML Row Generation ...
+    }).join('');
+}
+Purpose: To transform raw data into a visual table.
 
-### 7. Productivity & Theme Tools
-* **`toggleTimer()`**: Uses `setInterval`. It runs the `updateTimer` function exactly once every 1000 milliseconds (1 second).
-* **`updateTimer()`**: Calculates minutes and seconds. When it hits `0`, it triggers a system alert. This is a classic **HCI (Human-Computer Interaction)** feature for time management.
-* **`toggleDarkMode()`**: Switches the `data-theme` attribute on the `<body>`. Your CSS then looks for this attribute to change colors globally.
+The Logic: This is a Human-Computer Interaction (HCI) feature. Instead of refreshing the page, the script clears the old table and "paints" new rows using Template Literals, making the app feel fast and reactive.
+
+5. Focus Timer Logic (The "Clockwork")
+JavaScript
+function updateTimer() {
+    timeLeft--;
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+Purpose: To manage time intervals for the Pomodoro technique.
+
+The Logic: It uses Modular Arithmetic (% 60) to separate total seconds into minutes and seconds, ensuring the clock displays correctly (e.g., showing 24:09 instead of 24:9).
 
 ---
 
