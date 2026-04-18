@@ -1,5 +1,4 @@
-Certainly! Here is the complete, line-by-line breakdown of your `script.js` code. This is structured as a **Technical Narrative**, explaining exactly what each section does, the purpose behind it, and the logic that makes it work.
-
+Script.js explain in detail
 ---
 
 ### 1. Initialization (Connecting to the Cloud)
