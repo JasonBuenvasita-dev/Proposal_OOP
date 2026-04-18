@@ -11,39 +11,50 @@ This repository contains three developmental iterations of the StudySmart system
 
 ---
 
-## 🌐 1. Web Implementation (Primary)
-The primary version of StudySmart is built for the web to ensure cross-device accessibility.
+## 🔍 Technical Deep Dive (Main Web App)
 
-### Key Features
-- **User Authentication:** Secure registration and login via Supabase Auth.
-- **Task Management:** Full CRUD (Create, Read, Delete) capabilities for academic tasks.
-- **File Attachments:** Upload and view PDFs (📕), Word docs (📘), and images (🖼️) directly from the task list.
-- **Focus Timer:** Built-in Pomodoro-style 25-minute timer to aid study sessions.
-- **Personalized View:** Automatically filters tasks so users only see their own data.
-- **Dark Mode:** A toggleable interface for reduced eye strain during late-night study.
+The web version of StudySmart follows a **Client-Server Architecture** using a Backend-as-a-Service (BaaS) model.
 
-### Data Workflow
-1. **Auth:** User signs in using `db.auth.signInWithPassword`.
-2. **Storage:** Files are uploaded to the `task-images` bucket using `db.storage`.
-3. **Database:** Task details and file URLs are saved to the `tasks` table.
-4. **UI:** Tasks are fetched and sorted by deadline for display in `#taskTableBody`.
+### 1. Security & Authentication Logic
+* **User Isolation:** The system uses Supabase Auth to assign a unique `user_id` (UUID) to every registered student.
+* **Session Persistence:** The `checkUserSession` function runs on page load (`window.onload`) to ensure users aren't logged out when they refresh the page.
+* **Protected Queries:** When fetching tasks, the code uses `.eq('user_id', user.id)`, ensuring that Student A can never see the tasks of Student B.
 
----
+### 2. File Handling & Storage Strategy
+* **Naming Collision Prevention:** Files are renamed using `Date.now()` (the number of milliseconds since 1970) to ensure every upload is unique, even if two students upload a file named "homework.pdf".
+* **Dynamic Rendering:** The `renderTable` function uses JavaScript string methods to detect file extensions. It dynamically generates HTML to show 📕 for PDFs or `<img>` tags for photos based on the `image_url` metadata.
 
-## 🧪 2. Flask API Prototype (`App.py`)
-A backend prototype used to test server-side logic and API routing.
-- **Technology:** Python & Flask.
-- **Storage:** Uses an in-memory Python list (volatile; data resets on server restart).
-- **Routes:** - `POST /add_task`: Appends a task object to the memory list.
-  - `GET /get_tasks`: Retrieves all currently stored tasks.
+### 3. Database Schema (`tasks` table)
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | int8 | Unique identifier for every task. |
+| `task_name` | text | The title of the academic requirement. |
+| `subject` | text | Academic course (e.g., DBMS, HCI, Ethics). |
+| `deadline` | date | The due date used for chronological sorting. |
+| `priority` | text | High, Medium, or Low status. |
+| `image_url` | text | The public cloud link to the attachment. |
+| `user_id` | uuid | Link to the authenticated user account. |
 
 ---
 
-## 🖥️ 3. Tkinter Desktop Client (`Database.py`)
-A desktop-based GUI prototype designed for local network environments.
-- **Technology:** Python Tkinter for the GUI and `requests` for HTTP communication.
-- **Integration:** Connects to a local PHP endpoint (`save_task.php`) hosted on XAMPP/Apache.
-- **UI Components:** Utilizes `treeview` widgets to organize and display tasks in a desktop window.
+## 🌐 Implementation Logic Flow
+
+1. **Initialization:** The app establishes a connection via `supabase.createClient` using your project URL and API key.
+2. **Input Capture:** The `saveTask()` function gathers data from the DOM using `document.getElementById`.
+3. **Asynchronous Upload:** The app uses `async/await` to wait for the file to finish uploading to the **Storage Bucket** before attempting to save the task text to the **Database**.
+4. **State Management:** After a successful save, `fetchTasks()` is called to refresh the UI without requiring a full page reload.
+
+---
+
+## 🧪 Prototypes & Testing
+
+### Flask API Prototype (`App.py`)
+* **Purpose:** To test RESTful API routes (`GET` and `POST`).
+* **Behavior:** Stores tasks in a Python list. This is "Volatile Storage," meaning it is suitable for testing logic but not for long-term data persistence.
+
+### Tkinter Desktop Client (`Database.py`)
+* **Purpose:** To demonstrate cross-platform capability (Desktop vs Web).
+* **Integration:** Uses the `requests` library to bridge the Python GUI with a local PHP backend, simulating a traditional internal school network setup.
 
 ---
 
@@ -51,20 +62,12 @@ A desktop-based GUI prototype designed for local network environments.
 
 ### Web App
 1. Ensure your Supabase project has the `tasks` table and `task-images` bucket configured.
-2. Open `index.html` in any modern web browser.
-
-### Flask Prototype
-1. Run `pip install flask`.
-2. Execute `python App.py` and navigate to `http://127.0.0.1:5000`.
-
-### Tkinter Prototype
-1. Run `pip install requests`.
-2. Ensure XAMPP is active with Apache and MySQL running.
-3. Execute `python Database.py`.
+2. Set the `task-images` bucket to **Public** to allow the app to display file icons.
+3. Open `index.html` in any modern web browser.
 
 ---
 
 ## 👨‍💻 Project Details
-- **Lead Developer:** Buenavista Jason Jonh
-- **Section:** BSIT 2C
-- **Focus:** Information Technology, Database Management, and HCI
+* **Lead Developer:** Buenavista Jason Jonh
+* **Section:** BSIT 2C
+* **Course Focus:** Database Management, HCI, and Information Technology
