@@ -1,52 +1,55 @@
-Since your code has transitioned from a local PHP setup to a **Cloud-Integrated Supabase** system, your documentation needs to reflect this jump in technical complexity. 
+To help your team (and your instructor, **Timothy James Castro**) understand the logic behind the **StudySmart** engine, I’ve broken down the `script.js` file section by section. 
 
-Here is the updated **Technical Logic Breakdown** for your `README-script.md`. It explains the "Why" and "How" of your JavaScript in a way that aligns with your **BSIT 2C** curriculum (DBMS and HCI).
-
----
-
-## 🧠 Script.js: The Logical Core of StudySmart
-
-The `script.js` file serves as the **Controller** in our architecture. It manages the real-time interaction between the user’s browser and the **Supabase Cloud Backend**.
-
-### 1. Asynchronous Lifecycle (`async/await`)
-Unlike standard scripts, almost every function here is **Asynchronous**. 
-* **The Concept:** Talking to a cloud server in another part of the world takes time (latency). 
-* **The Logic:** We use `await` to pause code execution on specific lines until the database confirms success. This prevents the "Race Condition" where the app tries to display a task before the server has finished saving it.
+This is formatted as a **Technical Reference Guide** for your `README.md`.
 
 ---
 
-### 2. Multi-Stage Save Architecture (`saveTask`)
-The saving process is an **Atomic Operation**—it must complete several steps in a specific order to ensure data integrity:
-1.  **State Capture:** The script extracts values from the DOM using `document.getElementById`.
-2.  **Storage Phase:** If an attachment exists, the script pushes the binary data to the **Supabase S3 Bucket**. It uses `Date.now()` to rename the file, ensuring a unique **Primary Key** for every file upload.
-3.  **Persistence Phase:** Once the file URL is secured, the metadata (task name, deadline, priority) is inserted into the PostgreSQL database.
+## 🧠 script.js: Detailed Logic Breakdown
+
+### 1. Initialization (Connecting to the Cloud)
+```javascript
+const SUPABASE_URL = '...'; 
+const SUPABASE_KEY = '...';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+```
+* **Purpose:** These lines establish a secure tunnel between your web app and the Supabase servers.
+* **The Logic:** `createClient` initializes the library, allowing us to use the `db` variable to perform tasks like logging in or saving data later in the script.
+
+### 2. Authentication Logic (Security)
+* **`toggleAuthMode()`**: This manages the **UI State**. It switches the text on the screen between "Log In" and "Register," effectively turning one form into two different tools.
+* **`signUp()` / `signIn()`**: These are `async` (asynchronous) functions. They send the email and password to Supabase. We use `await` to tell the browser: *"Wait for the server to verify these credentials before moving to the next line."*
+* **`signOut()`**: Clears the user's session and reloads the page to ensure all private data is wiped from the current view.
+
+### 3. Session Management (Persistence)
+* **`checkUserSession()`**: This is the "Gatekeeper" function. 
+* **The Logic:** It asks Supabase, *"Is anyone already logged in on this computer?"* If a user is found, it uses `classList` to hide the login box and show the actual Task Manager. This is why you don't have to log in every time you refresh the page.
+
+### 4. File Upload System (Cloud Storage)
+* **`uploadFile(file)`**: 
+    * It extracts the file extension (e.g., `.pdf`).
+    * It renames the file using `Date.now()` (e.g., `1713456000.pdf`). This is a **Collision Prevention** strategy—it ensures that if two students upload "Homework.pdf," they won't overwrite each other.
+    * It returns a **Public URL**, which is the web link to that specific file in the cloud.
+
+### 5. Task CRUD: Save Operation
+* **`saveTask()`**: This is the most complex part of the engine.
+    1.  **Validation:** Checks if the user filled in the Name and Deadline. If not, it stops execution with an `alert`.
+    2.  **UI Feedback:** Changes the button text to "Saving..." and disables it. This prevents the user from clicking 10 times and creating duplicate tasks.
+    3.  **Two-Phase Commit:** It uploads the file *first* to get the link, then inserts the task text *second* into the database.
+
+### 6. Data Retrieval & Rendering
+* **`fetchTasks()`**: 
+    * Uses `.eq('user_id', user.id)`: This is **Row-Level Security**. It ensures Student A can only see Student A's tasks.
+    * Uses `.order('deadline', { ascending: true })`: Automatically sorts the list so your most urgent homework appears at the top.
+* **`renderTable(tasks)`**: 
+    * This function uses **Polymorphic Rendering**. It looks at the file extension and decides what icon to show: 📕 for PDF, 📘 for Word, or an actual image preview for photos.
+    * It uses `.map().join('')` to transform raw database data into clean HTML rows efficiently.
+
+### 7. Productivity & Theme Tools
+* **`toggleTimer()`**: Uses `setInterval`. It runs the `updateTimer` function exactly once every 1000 milliseconds (1 second).
+* **`updateTimer()`**: Calculates minutes and seconds. When it hits `0`, it triggers a system alert. This is a classic **HCI (Human-Computer Interaction)** feature for time management.
+* **`toggleDarkMode()`**: Switches the `data-theme` attribute on the `<body>`. Your CSS then looks for this attribute to change colors globally.
 
 ---
 
-### 3. State-Driven UI Management
-The script acts as a "Gatekeeper" for the user interface through the `checkUserSession` function:
-* **Session Handshake:** On every page load, the script contacts the Supabase Auth server. 
-* **Dynamic DOM Manipulation:** If a session is valid, the script uses `classList.toggle` to hide the login portal and reveal the Task Dashboard, providing a seamless **HCI (Human-Computer Interaction)** experience without page reloads.
-
----
-
-### 4. Reactive UI Rendering (`renderTable`)
-Instead of static HTML, the table is built dynamically using **Functional Mapping**:
-* **The Logic:** The script takes an array of database records and "maps" them into HTML rows using **Template Literals**.
-* **Polymorphic Rendering:** The logic parses the `image_url` string. It intelligently decides whether to render an `<img>` tag for photos or specific emojis (📕 for PDFs, 📘 for Docs), enhancing the system’s visual communication.
-
----
-
-### 5. Focus Engine (Pomodoro Logic)
-The timer leverages the browser’s **Web API** (`setInterval`):
-* **Temporal Logic:** Every 1000ms, the script decrements the `timeLeft` variable and updates the UI.
-* **HCI Feedback Loop:** When the timer reaches zero, the script triggers a system-level alert. This provides immediate **System Feedback**, a core principle of usable software design.
-
----
-
-### 💡 Why this is a "BSIT-Level" Implementation:
-* **Data Security:** You are utilizing UUID-based filtering (`.eq('user_id', user.id)`) to ensure **User Isolation**—a critical DBMS security concept.
-* **Efficiency:** By using `insertAdjacentHTML`, you avoid expensive full-page repaints, optimizing the application's performance.
-* **Modern Standards:** Your code follows **ES6+ standards** (Arrow functions, Destructuring, and Template Literals), showing that the project is built on professional, industry-standard foundations.
-
-This documentation highlights your growth from a student writing basic scripts to a developer managing **Cloud-Synchronized State**.
+### 💡 Why this is "Defense Ready" for BSIT 2C:
+If asked about the architecture during your presentation, you can explain that this script follows the **Controller** role in an MVC pattern. It handles **Asynchronous State Management** (waiting for cloud data) and **DOM Manipulation** (updating the UI without refreshing), which are standard requirements for professional web applications.
