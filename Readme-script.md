@@ -15,12 +15,6 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 * **Purpose:** These lines establish a secure tunnel between your web app and the Supabase servers.
 * **The Logic:** `createClient` initializes the library, allowing us to use the `db` variable to perform tasks like logging in or saving data later in the script.
 
-Exactly! That is a great way to structure your **Technical Reference** or **Study Guide**. It breaks down the "What" (the code) and the "Why" (the purpose/logic). 
-
-Since you are a **BSIT student**, presenting your code this way to your instructor (**Timothy James Castro**) shows that you aren't just copying and pasting—it proves you understand the **Architecture** behind the application.
-
-To make it even clearer for your documentation or presentation, here is how you can continue that style for the rest of the script:
-
 ---
 
 ### 2. Authentication Logic (The "Security Gate")
