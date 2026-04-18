@@ -82,13 +82,16 @@
             background: linear-gradient(135deg,var(--accent),var(--accent2));
             color: white; border: none; border-radius: 10px;
             font-weight: 600; padding: 12px; width: 100%;
+            transition: 0.2s;
         }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
 
         .badge-high { background: #ef4444; color: white; }
         .badge-medium { background: #f59e0b; color: white; }
         .badge-low { background: #22c55e; color: white; }
         
         .task-img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid var(--input-border); }
+        .table th { border: none; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -97,21 +100,19 @@
     <h1>📚 STUDY SMART</h1>
     <p>Efficient Academic Task Management</p>
     <div class="d-flex justify-content-center gap-2 mt-2">
-        <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Theme</button>
         <button class="btn btn-outline-light btn-sm px-3" id="logoutBtn" onclick="signOut()" style="display:none;">🚪 Logout</button>
     </div>
 </div>
 
 <div class="container pb-5">
-    <div id="statusMessage" class="alert d-none"></div>
-
     <div id="auth-section" class="row justify-content-center">
         <div class="col-md-4"> 
             <div class="card p-4">
                 <h4 class="text-center mb-3 fw-bold" id="authTitle">Welcome Back</h4>
                 <input type="email" id="email" class="form-control mb-2" placeholder="Email Address">
                 <input type="password" id="password" class="form-control mb-3" placeholder="Password">
-                <button class="btn btn-primary w-100 fw-bold" id="authBtn" onclick="handleAuth()">Log In</button>
+                <button class="btn btn-primary w-100 fw-bold" id="authBtn" onclick="signIn()">Log In</button>
                 <p class="text-center mt-3 small">
                     <span id="authMsg">New to StudySmart?</span> 
                     <a href="#" onclick="toggleAuthMode()" id="toggleLink">Create Account</a>
@@ -123,24 +124,26 @@
     <div id="main-app" class="row d-none">
         <div class="col-md-4">
             <div class="card p-3 text-center mb-4">
-                <h6>⏲️ Timer</h6>
+                <h6>⏲️ Focus Timer</h6>
                 <div class="timer-num" id="timerDisplay">25:00</div>
-                <button class="btn btn-primary btn-sm mt-2" onclick="toggleTimer()" id="timerBtn">Start</button>
+                <button class="btn btn-primary btn-sm mt-2 px-4" onclick="toggleTimer()" id="timerBtn">Start</button>
             </div>
 
             <div class="card p-4">
-                <h5 class="mb-3">✏️ Add New Task</h5>
+                <h5 class="mb-3 fw-bold">✏️ New Task</h5>
                 <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
-                <input type="text" id="subject" class="form-control mb-2" placeholder="Subject" />
+                <input type="text" id="subject" class="form-control mb-2" placeholder="Subject (e.g., DBMS, HCI)" />
+                <label class="small text-muted ms-1 mb-1">Due Date</label>
                 <input type="date" id="deadline" class="form-control mb-2" />
                 
-                <label class="small text-muted mb-1">Picture (Optional)</label>
-                <input type="file" id="task_image" class="form-control mb-2" accept="image/*" />
+                <label class="small text-muted ms-1 mb-1">File Attachment</label>
+                <input type="file" id="task_image" class="form-control mb-3" />
 
-                <select id="priority" class="form-select mb-3">
-                    <option value="High">🔴 High</option>
-                    <option value="Medium" selected>🟡 Medium</option>
-                    <option value="Low">🟢 Low</option>
+                <label class="small text-muted ms-1 mb-1">Priority Level</label>
+                <select id="priority" class="form-select mb-4">
+                    <option value="High">🔴 High Priority</option>
+                    <option value="Medium" selected>🟡 Medium Priority</option>
+                    <option value="Low">🟢 Low Priority</option>
                 </select>
                 <button class="btn-save" id="saveBtn" onclick="saveTask()">Save Task</button>
             </div>
@@ -149,23 +152,23 @@
         <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold">Pending Tasks</h5>
-                <span class="badge bg-primary" id="taskCounter">0 Tasks</span>
+                <span class="badge bg-primary px-3" id="taskCounter">0 Tasks</span>
             </div>
             <div class="card p-3">
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead>
                             <tr>
-                                <th>Pic</th>
+                                <th>Pic/File</th>
                                 <th>Task</th>
                                 <th>Subject</th>
                                 <th>Deadline</th>
                                 <th>Priority</th>
                                 <th>Action</th>
-                                <th></th>
                             </tr>
                         </thead>
-                        <tbody id="taskTableBody"></tbody>
+                        <tbody id="taskTableBody">
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -173,139 +176,6 @@
     </div>
 </div>
 
-<script>
-    const SUPABASE_URL = 'https://lafiafbqccrojlkjgcvk.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let isLoginMode = true;
-
-    function showStatus(msg, type = "success") {
-        const box = document.getElementById('statusMessage');
-        box.className = `alert alert-${type} d-block`;
-        box.innerText = msg;
-        setTimeout(() => box.className = 'alert d-none', 3000);
-    }
-
-    function toggleAuthMode() {
-        isLoginMode = !isLoginMode;
-        document.getElementById('authTitle').innerText = isLoginMode ? "Welcome Back" : "Join StudySmart";
-        document.getElementById('authBtn').innerText = isLoginMode ? "Log In" : "Register Now";
-        document.getElementById('toggleLink').innerText = isLoginMode ? "Create Account" : "Log In";
-    }
-
-    async function handleAuth() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        if (isLoginMode) {
-            const { error } = await db.auth.signInWithPassword({ email, password });
-            if (error) showStatus(error.message, "danger");
-            else checkUser();
-        } else {
-            const { error } = await db.auth.signUp({ email, password });
-            if (error) showStatus(error.message, "danger");
-            else showStatus("Account created! Now Log In.");
-        }
-    }
-
-    async function checkUser() {
-        const { data: { user } } = await db.auth.getUser();
-        if (user) {
-            document.getElementById('auth-section').classList.add('d-none');
-            document.getElementById('main-app').classList.remove('d-none');
-            document.getElementById('logoutBtn').style.display = 'block';
-            fetchTasks();
-        }
-    }
-
-    async function signOut() { await db.auth.signOut(); location.reload(); }
-
-   async function fetchTasks() {
-    // 1. Get the current logged-in user
-    const { data: { user } } = await db.auth.getUser();
-
-    if (!user) return; // Don't fetch if no one is logged in
-
-    // 2. Only select rows where user_id matches the current user
-    const { data, error } = await db.from('tasks')
-        .select('*')
-        .eq('user_id', user.id) // <--- THIS IS THE KEY FIX
-        .order('deadline', { ascending: true });
-
-    if (error) {
-        console.error("Error fetching tasks:", error.message);
-        return;
-    }
-
-    renderTable(data);
-}
-
-    async function saveTask() {
-        const { data: { user } } = await db.auth.getUser();
-        const name = document.getElementById('task_name').value;
-        const subject = document.getElementById('subject').value || 'General';
-        const deadline = document.getElementById('deadline').value;
-        const priority = document.getElementById('priority').value;
-        const imageFile = document.getElementById('task_image').files[0];
-
-        if (!name || !deadline) return showStatus("Name and Deadline required", "warning");
-
-        let imageUrl = null;
-        if (imageFile) {
-            const fileName = `${Date.now()}_${imageFile.name}`;
-            const { data, error: uploadError } = await db.storage.from('task-attachments').upload(fileName, imageFile);
-            if (!uploadError) {
-                const { data: urlData } = db.storage.from('task-attachments').getPublicUrl(fileName);
-                imageUrl = urlData.publicUrl;
-            }
-        }
-
-        const { error } = await db.from('tasks').insert([{ 
-            task_name: name, subject, deadline, priority, user_id: user.id, image_url: imageUrl 
-        }]);
-
-        if (!error) {
-            showStatus("Task saved!");
-            fetchTasks();
-            document.getElementById('task_name').value = '';
-            document.getElementById('task_image').value = '';
-        }
-    }
-
-    async function deleteTask(id) {
-        await db.from('tasks').delete().eq('id', id);
-        fetchTasks();
-    }
-
-   function renderTable(tasks) {
-    const tbody = document.getElementById('taskTableBody');
-    
-    tbody.innerHTML = tasks.map(t => {
-        // 1. Check if the task has an image URL
-        // 2. We use 'object-fit: cover' so the image stays a perfect square
-        const taskImage = t.image_url 
-            ? `<img src="${t.image_url}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`
-            : `<span style="font-size: 24px; opacity: 0.5;">📄</span>`;
-
-        return `
-            <tr>
-                <td>${taskImage}</td>
-                <td><strong>${t.task_name}</strong></td>
-                <td>${t.subject}</td>
-                <td>${t.deadline}</td>
-                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
-                <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
-            </tr>
-        `;
-    }).join('');
-}
-
-    function toggleDarkMode() {
-        const body = document.body;
-        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    }
-
-    window.onload = checkUser;
-</script>
+<script src="script.js"></script>
 </body>
 </html>
