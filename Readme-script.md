@@ -15,20 +15,32 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 * **Purpose:** These lines establish a secure tunnel between your web app and the Supabase servers.
 * **The Logic:** `createClient` initializes the library, allowing us to use the `db` variable to perform tasks like logging in or saving data later in the script.
 
-2. Authentication Logic (The "Security Gate")
-JavaScript
+Exactly! That is a great way to structure your **Technical Reference** or **Study Guide**. It breaks down the "What" (the code) and the "Why" (the purpose/logic). 
+
+Since you are a **BSIT student**, presenting your code this way to your instructor (**Timothy James Castro**) shows that you aren't just copying and pasting—it proves you understand the **Architecture** behind the application.
+
+To make it even clearer for your documentation or presentation, here is how you can continue that style for the rest of the script:
+
+---
+
+### 2. Authentication Logic (The "Security Gate")
+
+```javascript
 async function signIn() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const { error } = await db.auth.signInWithPassword({ email, password });
     if (error) alert(error.message); else checkUserSession();
 }
-Purpose: To verify user credentials against the database.
+```
+* **Purpose:** To verify user credentials against the database.
+* **The Logic:** It uses `await` because talking to the cloud isn't instant. The script "waits" for Supabase to check the email and password before deciding whether to show an error or let the user in.
 
-The Logic: It uses await because talking to the cloud isn't instant. The script "waits" for Supabase to check the email and password before deciding whether to show an error or let the user in.
+---
 
-3. Universal File Upload (The "Storage Bridge")
-JavaScript
+### 3. Universal File Upload (The "Storage Bridge")
+
+```javascript
 async function uploadFile(file) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
@@ -36,34 +48,43 @@ async function uploadFile(file) {
     const { data } = db.storage.from('task-images').getPublicUrl(fileName);
     return data.publicUrl;
 }
-Purpose: To move physical files (images/PDFs) from your computer to cloud storage.
+```
+* **Purpose:** To move physical files (images/PDFs) from your computer to cloud storage.
+* **The Logic:** It implements **Collision Prevention** by using `Date.now()`. By renaming every file to a unique timestamp, it ensures that two users never overwrite each other's files.
 
-The Logic: It implements Collision Prevention by using Date.now(). By renaming every file to a unique timestamp, it ensures that two users never overwrite each other's files.
+---
 
-4. Dynamic UI Rendering (The "Artist")
-JavaScript
+### 4. Dynamic UI Rendering (The "Artist")
+
+```javascript
 function renderTable(tasks) {
     tbody.innerHTML = tasks.map(t => {
         // ... HTML Row Generation ...
     }).join('');
 }
-Purpose: To transform raw data into a visual table.
+```
 
-The Logic: This is a Human-Computer Interaction (HCI) feature. Instead of refreshing the page, the script clears the old table and "paints" new rows using Template Literals, making the app feel fast and reactive.
+* **Purpose:** To transform raw data into a visual table.
+* **The Logic:** This is a **Human-Computer Interaction (HCI)** feature. Instead of refreshing the page, the script clears the old table and "paints" new rows using **Template Literals**, making the app feel fast and reactive.
 
-5. Focus Timer Logic (The "Clockwork")
-JavaScript
+---
+
+### 5. Focus Timer Logic (The "Clockwork")
+
+```javascript
 function updateTimer() {
     timeLeft--;
     const mins = Math.floor(timeLeft / 60);
     const secs = timeLeft % 60;
     document.getElementById('timerDisplay').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
-Purpose: To manage time intervals for the Pomodoro technique.
-
-The Logic: It uses Modular Arithmetic (% 60) to separate total seconds into minutes and seconds, ensuring the clock displays correctly (e.g., showing 24:09 instead of 24:9).
+```
+* **Purpose:** To manage time intervals for the Pomodoro technique.
+* **The Logic:** It uses **Modular Arithmetic** (`% 60`) to separate total seconds into minutes and seconds, ensuring the clock displays correctly (e.g., showing `24:09` instead of `24:9`).
 
 ---
 
-### 💡 Why this is "Defense Ready" for BSIT 2C:
-If asked about the architecture during your presentation, you can explain that this script follows the **Controller** role in an MVC pattern. It handles **Asynchronous State Management** (waiting for cloud data) and **DOM Manipulation** (updating the UI without refreshing), which are standard requirements for professional web applications.
+### 💡 Pro-Tip for your Presentation:
+If you put this in your `README.md` or your project documentation, you can call this section **"Code Narrative"** or **"Annotated Logic."** It’s a very professional way to document a BSIT project!
+
+Does this format work for the rest of your sections, or do you want to adjust the "Beginner" level of the explanations?
