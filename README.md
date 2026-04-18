@@ -1,6 +1,4 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/README.md b/README.md
-index 460b09a69c492bfe77803d8a2fd449aefc3db9d7..828e4f538429254be94541b05a433e6917406f6e 100644
+
 --- a/README.md
 +++ b/README.md
 @@ -1,17 +1,124 @@
