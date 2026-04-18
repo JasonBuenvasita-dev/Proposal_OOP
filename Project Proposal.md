@@ -7,7 +7,8 @@
 
 ## 🟢 1. PROJECT IDENTIFICATION
 **Project Title:** StudySmart: Integrated Academic Task & Deadline Management System  
-**Lead Developers:** * AGANA, DEGHNE GABRIEL  
+**Lead Developers:** 
+* AGANA, DEGHNE GABRIEL  
 * ALUMBRO, RYAN VELASCO  
 * BARAJAN, VERL ANDRIAN POSADAS  
 * BUENAVISTA, JASON JONH  
