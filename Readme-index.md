@@ -1,790 +1,724 @@
-# 📖 Complete Line-by-Line Breakdown of `script.js`
+# 📖 Complete Line-by-Line Breakdown of `index.html`
 
 ---
 
-## 🔧 SECTION 1 — INITIALIZATION (Lines 1–4)
+## 🔝 SECTION 1 — DOCUMENT HEAD (Lines 1–10)
 
-```javascript
-const SUPABASE_URL = 'https://lafiafbqccrojlkjgcvk.supabase.co';
+```html
+<!DOCTYPE html>
 ```
-- `const` means this variable **cannot be reassigned** later in the code — it's a fixed value.
-- `SUPABASE_URL` is written in ALL_CAPS by convention to signal it's a **constant** that never changes.
-- The string value is your **unique Supabase project address** — like a home address for your database. Every project on Supabase gets its own URL.
+- This is the **document type declaration** — it's not an HTML tag, it's an instruction to the browser.
+- Tells the browser: "This file uses **HTML5**" — the modern standard.
+- Without this, browsers enter **"quirks mode"** and may render the page incorrectly with old, inconsistent rules.
+- Must always be the **very first line** of every HTML file.
 
-```javascript
-const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
+```html
+<html lang="en">
 ```
-- This is your **publishable API key** — a password that tells Supabase "this request is coming from my app."
-- It's called "publishable" because it's safe to include in front-end code — it's **not a secret admin key**. It only gives limited, controlled access.
+- The root element — every other element in the page lives inside this.
+- `lang="en"` tells the browser and screen readers that the page content is in **English**.
+- This helps with accessibility (screen readers pronounce words correctly) and SEO (search engines understand the language).
 
-```javascript
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+```html
+<head>
 ```
-- `supabase` here refers to the **Supabase JavaScript library** that was loaded in the HTML via a `<script>` tag.
-- `.createClient()` takes the URL and KEY and creates a **connection object** — think of it as opening a phone line to your database.
-- The result is stored in `db`. From this point on, every time you want to talk to the database, storage, or auth system, you use `db.something()`.
-- Without this line, **nothing else in the file would work** — it's the foundation of everything.
+- The `<head>` section is **invisible to users** — it contains metadata and resources.
+- Nothing inside `<head>` appears on screen directly.
+- The browser reads this section first before rendering anything.
+
+```html
+    <meta charset="UTF-8">
+```
+- `<meta>` tags provide metadata — information about the page itself.
+- `charset="UTF-8"` sets the **character encoding** to UTF-8.
+- UTF-8 supports virtually every character in every language, plus emojis (📚, 🔴, 🌙, etc.).
+- Without this, emojis and special characters (accents, symbols) might display as garbled characters like `â€™`.
+
+```html
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+```
+- This is the **responsive design meta tag** — critically important for mobile devices.
+- `width=device-width` tells the browser: "Set the viewport width to the actual screen width" — so a phone shows the mobile layout, not a zoomed-out desktop view.
+- `initial-scale=1.0` sets the default zoom level to 100% on first load.
+- Without this tag, mobile browsers would zoom out to fit a "desktop-sized" page, making everything tiny.
+
+```html
+    <title>StudySmart | Task Manager</title>
+```
+- Sets the text that appears in the **browser tab** and bookmark name.
+- Also used by search engines as the page title in search results.
+- The `|` is just a visual separator between the app name and description.
+
+```html
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+```
+- `<link>` loads an **external CSS file**.
+- `rel="stylesheet"` tells the browser this is a CSS stylesheet.
+- This loads **Bootstrap 5.3.0** from a CDN (Content Delivery Network) — a fast public server.
+- Bootstrap provides hundreds of pre-built CSS classes like `btn`, `card`, `d-none`, `container`, `row`, `col-md-4`, etc. that are used throughout the HTML.
+- `bootstrap.min.css` is the **minified** version — whitespace and comments stripped out, smaller file = faster download.
+
+```html
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+```
+- Loads the **Plus Jakarta Sans** font from Google Fonts.
+- `wght@400;500;600;700` loads 4 specific font weights: regular (400), medium (500), semibold (600), bold (700).
+- `display=swap` is a font loading strategy — it shows a fallback font first, then swaps to Plus Jakarta Sans once loaded. This prevents invisible text during loading.
+- This font is referenced in the CSS as `font-family: 'Plus Jakarta Sans', sans-serif`.
+
+```html
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+```
+- Loads the **Supabase JavaScript library** from a CDN.
+- This makes the global `supabase` object available, which `script.js` uses to call `supabase.createClient()`.
+- Must be loaded **before** `script.js` — if it loaded after, `script.js` would crash because `supabase` wouldn't be defined yet.
+- `@supabase/supabase-js@2` is version 2 of the library.
 
 ---
 
-## 🔐 SECTION 2 — AUTHENTICATION LOGIC (Lines 6–41)
+## 🎨 SECTION 2 — CSS STYLES (Lines 11–95)
 
-### `toggleAuthMode()` — Switches Between Login and Register Form
+### `:root` — Global CSS Variables (Light Theme)
 
-```javascript
-function toggleAuthMode() {
+```css
+:root {
 ```
-- Declares a regular (non-async) function named `toggleAuthMode`.
-- It's called when the user clicks the "Create Account" or "Log In" link at the bottom of the auth card.
+- `:root` is a CSS pseudo-class that targets the `<html>` element — the highest level of the document.
+- Variables defined here are **globally accessible** anywhere in the CSS using `var()`.
+- This is where the entire **light theme color palette** is defined.
 
-```javascript
-    const title = document.getElementById('authTitle');
+```css
+    --bg: #f0f2ff;
 ```
-- `document.getElementById()` searches the entire HTML page for an element with `id="authTitle"`.
-- That element is the `<h4>` tag showing "Welcome Back" or "Join StudySmart".
-- Stored in `title` so we can change its text.
+- `--bg` is a **CSS custom property** (CSS variable). The `--` prefix is required for all custom properties.
+- `#f0f2ff` is a very light lavender/blue — used as the page background color.
+- Used in `body { background: var(--bg); }`.
 
-```javascript
-    const btn = document.getElementById('authBtn');
+```css
+    --card-bg: rgba(255,255,255,0.95);
 ```
-- Gets the main action button (the one that says "Log In" or "Register Now").
-- We need this to both **read** its current label and **change** it.
+- Card background — near-white with 95% opacity (slightly transparent).
+- `rgba()` = Red, Green, Blue, Alpha (opacity). Alpha `0.95` = 95% visible.
+- The slight transparency works with `backdrop-filter: blur()` on cards.
 
-```javascript
-    const link = document.getElementById('toggleLink');
+```css
+    --card-border: rgba(109,40,217,0.12);
 ```
-- Gets the toggle anchor link at the bottom ("Create Account" / "Log In").
-- We need to change its label too so it always shows the opposite of the current mode.
+- A very faint purple border color for cards — 12% opacity purple.
+- `109,40,217` is the RGB value of a deep purple (#6d28d9).
 
-```javascript
-    if (btn.innerText === "Log In") {
+```css
+    --text: #1e1b4b;
 ```
-- `innerText` reads the **visible text** currently inside the button element.
-- This is how the function knows which mode it's currently in — it checks the button label as a state indicator.
-- If the button says "Log In", the form is currently in login mode, so we need to switch to register mode.
+- Deep navy/indigo — the main text color. Dark enough for readability on light backgrounds.
 
-```javascript
-        title.innerText = "Join StudySmart";
+```css
+    --accent: #7c3aed;
 ```
-- Changes the heading text from "Welcome Back" to "Join StudySmart" to visually signal registration mode.
+- Vibrant purple — used for headings, the timer number, table headers, and button gradients.
 
-```javascript
-        btn.innerText = "Register Now";
+```css
+    --accent2: #0ea5e9;
 ```
-- Changes the button label to tell the user what clicking it will do.
+- Sky blue — used as the second color in gradients (buttons, header).
 
-```javascript
-        btn.setAttribute("onclick", "signUp()");
+```css
+    --input-bg: #f8f7ff;
+    --input-border: #e0d9ff;
 ```
-- `setAttribute()` changes an HTML attribute dynamically.
-- This rewires the button's click action from `signIn()` to `signUp()`.
-- This is important — without this, clicking "Register Now" would still try to log in instead of register.
+- Very light purple-tinted white for form input backgrounds and borders.
 
-```javascript
-        link.innerText = "Log In";
+```css
+    --shadow: 0 8px 32px rgba(109,40,217,0.10);
 ```
-- Changes the toggle link text. Now that we're in register mode, the link should say "Log In" so users can switch back.
+- A CSS box shadow definition:
+  - `0` = no horizontal offset
+  - `8px` = 8px vertical offset (shadow below)
+  - `32px` = blur radius (soft, spread-out shadow)
+  - `rgba(109,40,217,0.10)` = 10% opacity purple shadow
+- Creates a subtle purple glow under cards and the header.
 
-```javascript
-    } else {
-        title.innerText = "Welcome Back";
-        btn.innerText = "Log In";
-        btn.setAttribute("onclick", "signIn()");
-        link.innerText = "Create Account";
-    }
+```css
+    --header-gradient: linear-gradient(-45deg,#7c3aed,#0ea5e9,#f43f5e,#7c3aed);
 }
 ```
-- The `else` branch handles the reverse — switching **back** from register to login mode.
-- Every change is the mirror image of the `if` block: heading resets, button resets, onclick resets, link resets.
+- A 4-stop gradient at -45 degrees going through: purple → sky blue → rose/pink → purple again.
+- The repeated purple at the end creates a seamless loop for the animation.
 
 ---
 
-### `signUp()` — Creates a New Account
+### `[data-theme="dark"]` — Dark Theme Overrides
 
-```javascript
-async function signUp() {
+```css
+[data-theme="dark"] {
 ```
-- `async` means this function contains `await` calls — it performs **asynchronous operations** (things that take time, like network requests).
-- Without `async`, using `await` inside would throw a syntax error.
+- This CSS selector targets any element that has the attribute `data-theme="dark"`.
+- Applied to `<body>` by JavaScript's `toggleDarkMode()`.
+- When active, every `var()` call in the CSS automatically uses these dark values instead of the `:root` ones — the entire UI repaints instantly.
 
-```javascript
-    const email = document.getElementById('email').value;
+```css
+    --bg: #0f0e1a;
 ```
-- Gets the `<input id="email">` element and reads its `.value` property — whatever text the user typed.
-- `.value` is specific to input elements; it returns the current text content of the field.
+- Very dark navy/black — the dark mode page background.
 
-```javascript
-    const password = document.getElementById('password').value;
+```css
+    --card-bg: rgba(22,20,40,0.97);
 ```
-- Same pattern — reads the password field's current value.
-- Even though it's a password input (characters show as dots), `.value` still gives the actual text.
+- Near-opaque dark purple-black for card backgrounds.
 
-```javascript
-    const { error } = await db.auth.signUp({ email, password });
+```css
+    --card-border: rgba(139,92,246,0.18);
 ```
-- `db.auth.signUp()` calls Supabase's authentication system to **create a new user account**.
-- `{ email, password }` is ES6 shorthand for `{ email: email, password: password }`.
-- `await` pauses this function until Supabase finishes the network request and responds.
-- `{ error }` is **destructuring** — Supabase returns an object like `{ data: {...}, error: null }`, and we pull out only the `error` property. We don't need `data` here.
+- A brighter purple border (18% opacity) — slightly more visible against dark backgrounds.
 
-```javascript
-    if (error) alert("Error: " + error.message);
+```css
+    --text: #ede9fe;
 ```
-- If `error` is not null (meaning something went wrong), shows a browser alert dialog.
-- `error.message` is a human-readable description of what failed (e.g., "User already registered", "Password too short").
-- The `+` operator joins the string "Error: " with the message.
+- Very light lavender — text color in dark mode. Soft white rather than pure white to reduce eye strain.
 
-```javascript
-    else alert("Success! Please check your email for a confirmation link.");
+```css
+    --accent: #a78bfa;
+    --accent2: #38bdf8;
+```
+- Lighter versions of the accent colors — the original purples/blues would be too dark to see on dark backgrounds.
+
+```css
+    --input-bg: #1a1730;
+    --input-border: #2e2850;
+    --shadow: 0 8px 32px rgba(0,0,0,0.35);
 }
 ```
-- If no error, the account was created — but Supabase requires **email verification** before the user can log in.
-- The alert instructs the user to check their inbox and click the confirmation link.
+- Dark input backgrounds and borders.
+- Shadow becomes a pure black shadow (35% opacity) instead of purple-tinted, since dark backgrounds need stronger contrast.
 
 ---
 
-### `signIn()` — Logs In an Existing User
+### `body` Styles
 
-```javascript
-async function signIn() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+```css
+body {
+    background: var(--bg);
 ```
-- Same as `signUp()` — reads email and password from the form inputs.
+- Sets the full page background to the `--bg` variable (light lavender in light mode, dark navy in dark mode).
 
-```javascript
-    const { error } = await db.auth.signInWithPassword({ email, password });
+```css
+    color: var(--text);
 ```
-- `signInWithPassword()` sends the credentials to Supabase, which checks them against stored accounts.
-- If correct, Supabase **automatically stores a session token** in the browser (in localStorage or a cookie) — this is what enables auto-login on future visits.
-- Again we only destructure `error`; the session is handled internally by the Supabase client library.
+- Sets the **default text color** for the entire page. All text inherits this unless overridden.
 
-```javascript
-    if (error) alert("Login failed: " + error.message);
+```css
+    font-family: 'Plus Jakarta Sans', sans-serif;
 ```
-- Common errors here include: wrong password, email not confirmed, account doesn't exist.
+- Sets the font for the entire page.
+- `sans-serif` is the **fallback** — if Plus Jakarta Sans fails to load, the browser uses its default sans-serif font.
 
-```javascript
-    else checkUserSession();
+```css
+    transition: 0.3s;
+```
+- Applies a **0.3-second transition** to ALL CSS properties on the body.
+- This is what makes the dark/light mode switch **animate smoothly** instead of snapping instantly.
+- All the CSS variable changes (background, text color, etc.) transition over 0.3 seconds.
+
+```css
+    min-height: 100vh;
 }
 ```
-- If login succeeded, immediately calls `checkUserSession()` to update the UI.
-- Instead of reloading the page, we call this function directly to avoid a flash — it hides the login form and shows the app smoothly.
+- `100vh` = 100% of the **viewport height** (the visible browser window).
+- Ensures the background color covers at least the full screen height, even if there's little content.
 
 ---
 
-### `signOut()` — Logs Out the Current User
+### `.header-section` Styles
 
-```javascript
-async function signOut() {
-    await db.auth.signOut();
+```css
+.header-section {
+    background: var(--header-gradient);
 ```
-- `db.auth.signOut()` tells Supabase to **invalidate the current session**.
-- Supabase deletes the session token from the browser's storage.
-- `await` waits for this to complete before moving to the next line.
+- Applies the animated 4-color gradient as the background.
 
-```javascript
-    location.reload();
+```css
+    background-size: 320% 320%;
+```
+- Makes the gradient **much larger** than the element (320% of its size).
+- This is required for the animation to work — you can only "scroll" through a gradient if it's bigger than the visible area.
+
+```css
+    animation: gradientShift 14s ease infinite;
+```
+- Applies the `@keyframes gradientShift` animation:
+  - `14s` = takes 14 seconds to complete one cycle
+  - `ease` = starts slow, speeds up, slows down at the end
+  - `infinite` = loops forever
+
+```css
+    color: white;
+    padding: 30px 10px;
+    text-align: center;
+```
+- White text on the colorful gradient background.
+- `30px 10px` = 30px top/bottom padding, 10px left/right padding.
+- Centers all text content.
+
+```css
+    border-radius: 0 0 24px 24px;
+```
+- Rounds only the **bottom-left and bottom-right** corners (24px each).
+- Top corners stay sharp (0) so the header sits flush with the browser top.
+- Order is: top-left, top-right, bottom-right, bottom-left.
+
+```css
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
 }
 ```
-- `location` is a built-in browser object representing the current URL.
-- `.reload()` refreshes the entire page — like pressing F5.
-- Since the session is now gone, when the page reloads and `checkUserSession()` runs again at `window.onload`, `user` will be `null` and the login form will be shown.
+- Applies the purple shadow beneath the header.
+- 30px space below the header before the main content begins.
 
 ---
 
-## 🔍 SECTION 3 — SESSION CHECK (Lines 43–58)
+### `@keyframes gradientShift`
 
-### `checkUserSession()` — Determines What to Show on Page Load
-
-```javascript
-async function checkUserSession() {
-    const { data: { user } } = await db.auth.getUser();
-```
-- `db.auth.getUser()` asks the Supabase client: "Is there an active logged-in session right now?"
-- Supabase checks its stored session token in the browser and returns user data if valid, or `null` if not.
-- `{ data: { user } }` is **nested destructuring** — the response shape is `{ data: { user: {...} }, error: null }`, and this one-liner drills two levels deep to extract just the `user` object directly.
-
-```javascript
-    const loginBox = document.getElementById('auth-section');
-```
-- Gets the div that wraps the entire login/register form.
-- In the HTML it has the class `d-none` removed/added to show or hide it.
-
-```javascript
-    const appBox = document.getElementById('main-app');
-```
-- Gets the div that contains the full app — the timer, task form, and task table.
-- In the HTML it starts with class `d-none` (hidden by default) until a user logs in.
-
-```javascript
-    const logoutBtn = document.getElementById('logoutBtn');
-```
-- Gets the logout button in the header.
-- It starts with `style="display:none;"` in the HTML so it's invisible until login.
-
-```javascript
-    if (user) {
-```
-- `user` will be a JavaScript object (truthy) if logged in, or `null` (falsy) if not.
-- Only the `if` branch exists — if no user, nothing happens and both sections stay as they are (login visible, app hidden).
-
-```javascript
-        if(loginBox) loginBox.classList.add('d-none');
-```
-- `if(loginBox)` is a safety guard — checks the element actually exists before trying to modify it (avoids "Cannot read properties of null" errors).
-- `.classList.add('d-none')` adds Bootstrap's `d-none` class which applies `display: none !important` via CSS, hiding the login form.
-
-```javascript
-        if(appBox) appBox.classList.remove('d-none');
-```
-- `.classList.remove('d-none')` removes the hidden class, making the main app visible.
-- Bootstrap's `d-none` was on this element in the HTML by default.
-
-```javascript
-        if(logoutBtn) logoutBtn.style.display = 'block';
-```
-- Directly sets the inline CSS `display` property to `'block'`, making the logout button visible.
-- Uses inline style here (rather than classList) because the original HTML hid it with an inline style.
-
-```javascript
-        fetchTasks();
-    }
+```css
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 ```
-- Immediately loads the user's tasks from the database once we know they're logged in.
-- This is what populates the table when you first open the app while already logged in.
+- Defines the animation sequence for the header gradient.
+- `background-position` shifts the visible portion of the oversized gradient:
+  - At 0% (start): shows the left portion of the gradient (purple side).
+  - At 50% (halfway): shifts to show the right portion (pink/rose side).
+  - At 100% (end): returns to start — seamless loop.
+- The `50%` vertical position keeps the gradient horizontally shifting (not vertically).
+- Combined with `background-size: 320%`, this creates the flowing color animation.
 
 ---
 
-## 📁 SECTION 4 — FILE UPLOAD (Lines 60–73)
+### `.card` Styles
 
-### `uploadFile(file)` — Sends a File to Supabase Storage
-
-```javascript
-async function uploadFile(file) {
+```css
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
 ```
-- Takes one parameter: `file` — a JavaScript `File` object (from `<input type="file">`).
-- This function is a **helper** — it's only called from inside `saveTask()`, never directly by the user.
+- Overrides Bootstrap's default `.card` styles with custom ones.
+- Heavily rounded corners (20px) for a modern, soft look.
 
-```javascript
-    const fileExt = file.name.split('.').pop();
+```css
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
 ```
-- `file.name` is the original filename, e.g., `"homework_notes.pdf"`.
-- `.split('.')` breaks it into an array: `["homework_notes", "pdf"]`.
-- `.pop()` removes and returns the **last element** of that array: `"pdf"`.
-- Result: `fileExt = "pdf"`. This is needed to preserve the correct file extension when saving.
+- `backdrop-filter: blur(10px)` blurs whatever is **behind** the card element.
+- This creates a frosted glass effect when cards overlap with the gradient header or colored backgrounds.
+- Only works if the card background has some transparency (which it does — `rgba(..., 0.95)`).
 
-```javascript
-    const fileName = `${Date.now()}.${fileExt}`;
-```
-- `Date.now()` returns the current time as a **Unix timestamp in milliseconds** — e.g., `1720512345678`.
-- This creates a filename like `"1720512345678.pdf"`.
-- Why? Because if two users both upload a file called `"notes.pdf"`, they'd overwrite each other. Using timestamps makes every filename **unique**.
-- The backticks (`` ` ``) and `${}` syntax is a **template literal** — it embeds variables directly into strings.
-
-```javascript
-    let { error: uploadError } = await db.storage
-        .from('task-images')
-        .upload(fileName, file);
-```
-- `db.storage` accesses Supabase's file storage system (separate from the database).
-- `.from('task-images')` selects the storage **bucket** named "task-images" — think of it like a folder.
-- `.upload(fileName, file)` sends the actual file data to that bucket with the generated filename.
-- `{ error: uploadError }` — we rename `error` to `uploadError` using destructuring aliasing. This is done to avoid a naming conflict with the `error` variable used later in `saveTask()`.
-- `let` is used instead of `const` here because... actually it doesn't need to be — `const` would work fine here too. It's just a stylistic choice.
-
-```javascript
-    if (uploadError) throw uploadError;
-```
-- If the upload failed (bucket doesn't exist, file too large, wrong permissions, etc.), `throw` **raises an exception**.
-- `throw` immediately exits the current function and passes the error to the nearest `catch` block — which is in `saveTask()`.
-- This is important: if the file upload fails, we don't want to save a broken `image_url` to the database.
-
-```javascript
-    const { data } = db.storage.from('task-images').getPublicUrl(fileName);
-```
-- Once uploaded, this gets the **permanent public URL** where anyone can access the file.
-- Note: there's **no `await`** here — `getPublicUrl()` is synchronous because it doesn't make a network request; it just constructs the URL based on the bucket name and filename.
-- We destructure `data` from the response.
-
-```javascript
-    return data.publicUrl;
+```css
+    margin-bottom: 18px;
 }
 ```
-- `data.publicUrl` is the full URL string, like `"https://lafiafbqccrojlkjgcvk.supabase.co/storage/v1/object/public/task-images/1720512345678.pdf"`.
-- `return` sends this URL back to wherever `uploadFile()` was called (inside `saveTask()`), so it can be stored in the database.
+- 18px gap below each card so stacked cards don't touch.
 
 ---
 
-## 💾 SECTION 5 — SAVE TASK (Lines 75–115)
+### Form and Button Styles
 
-### `saveTask()` — The Most Complex Function
-
-```javascript
-async function saveTask() {
-    const { data: { user } } = await db.auth.getUser();
+```css
+.timer-num { font-size: 2.5rem; font-weight: 700; color: var(--accent); }
 ```
-- Re-verifies the logged-in user at the moment of saving. This is a **security measure** — never trust only front-end state because sessions can expire.
+- Styles the large timer display (e.g., "25:00").
+- `2.5rem` = 2.5× the root font size (typically 40px).
+- `700` = bold weight. Purple accent color.
 
-```javascript
-    if (!user) return alert("Please log in first!");
-```
-- `!user` means "if user is null/falsy."
-- `return alert(...)` does two things: shows the alert AND immediately exits the function. The `return` prevents any code below from running.
-- This guards against edge cases where the session expired while the user had the page open.
-
-```javascript
-    const name = document.getElementById('task_name').value;
-    const subject = document.getElementById('subject').value;
-    const deadline = document.getElementById('deadline').value;
-    const priority = document.getElementById('priority').value;
-```
-- Each line reads one form field's current value.
-- `priority` comes from a `<select>` dropdown — `.value` returns whichever `<option>` is currently selected (e.g., `"High"`, `"Medium"`, or `"Low"`).
-
-```javascript
-    const fileInput = document.getElementById('task_image').files[0];
-```
-- `<input type="file">` has a special `.files` property — it's a `FileList` object containing all selected files.
-- `[0]` gets the first (and only, since no `multiple` attribute) file.
-- If no file was selected, `files[0]` is `undefined`, which is falsy — important for the `if (fileInput)` check later.
-
-```javascript
-    if (!name || !deadline) return alert("Name and Deadline are required!");
-```
-- `||` is the logical OR operator — if **either** `name` OR `deadline` is empty (empty string is falsy), show the alert and exit.
-- Subject and priority aren't required — subject has no validation, and priority always has a default selected value.
-
-```javascript
-    const saveBtn = document.getElementById('saveBtn');
-    saveBtn.innerText = "Saving...";
-    saveBtn.disabled = true;
-```
-- Gets the save button element.
-- Changes its label to "Saving..." to give the user visual feedback that something is happening.
-- `disabled = true` grays out the button and prevents clicking it again — this prevents **double submission** (user clicking Save twice before the first save completes).
-
-```javascript
-    try {
-```
-- Begins a `try...catch...finally` block.
-- Any `throw` statement or unhandled error inside this `try` block will jump to the `catch` block.
-- This pattern is essential for async operations that might fail.
-
-```javascript
-        let fileUrl = null;
-```
-- Initializes `fileUrl` as `null`. If no file is attached, the task will be saved with `image_url: null` in the database.
-- `let` is used (not `const`) because the value might be reassigned on the next line.
-
-```javascript
-        if (fileInput) {
-            fileUrl = await uploadFile(fileInput);
-        }
-```
-- Only calls `uploadFile()` if a file was actually selected (remember, `fileInput` is `undefined` if nothing was chosen).
-- `await` waits for the upload to finish and for the URL to be returned before continuing.
-- If `uploadFile()` throws an error (from the `throw uploadError` line inside it), execution immediately jumps to `catch`.
-
-```javascript
-        const { error } = await db.from('tasks').insert([{ 
-            task_name: name, 
-            subject: subject, 
-            deadline: deadline, 
-            priority: priority,
-            image_url: fileUrl,
-            user_id: user.id 
-        }]);
-```
-- `db.from('tasks')` targets the `tasks` table in your Supabase database.
-- `.insert([{...}])` inserts a **new row**. The array `[{...}]` can technically hold multiple rows, but here we always insert one.
-- Each key (`task_name`, `subject`, etc.) must **match the exact column names** in your Supabase table.
-- `image_url: fileUrl` will be either a URL string or `null`.
-- `user_id: user.id` stores which user owns this task — this is crucial for **Row Level Security (RLS)** in Supabase, which prevents users from seeing each other's data.
-
-```javascript
-        if (error) throw error;
-```
-- If Supabase returns an error from the insert (e.g., constraint violation, network issue), throws it to jump to `catch`.
-
-```javascript
-        fetchTasks();
-```
-- Refreshes the task table to show the newly added task immediately.
-
-```javascript
-        document.getElementById('task_name').value = '';
-        document.getElementById('subject').value = '';
-        document.getElementById('deadline').value = '';
-        document.getElementById('task_image').value = '';
-```
-- Clears all form inputs by setting `.value` to an empty string.
-- This resets the form so the user can immediately add another task.
-- Note: `priority` is intentionally **not** cleared — it keeps its last selected value as a convenience.
-
-```javascript
-    } catch (err) {
-        alert("Error: " + err.message);
-```
-- If anything inside the `try` block threw an error, `catch` receives it as `err`.
-- Shows the error message in an alert. This handles both upload errors and database errors with one handler.
-
-```javascript
-    } finally {
-        saveBtn.innerText = "Save Task";
-        saveBtn.disabled = false;
-    }
+```css
+.form-control, .form-select {
+    background: var(--input-bg) !important;
+    border: 1.5px solid var(--input-border) !important;
+    color: var(--text) !important;
+    border-radius: 10px !important;
 }
 ```
-- `finally` runs **no matter what** — whether the task saved successfully, or an error occurred.
-- Restores the button's text and re-enables it so the user can try again.
-- Without `finally`, if an error occurred, the button would stay disabled forever and the user couldn't save any more tasks.
+- Overrides Bootstrap's default form styles.
+- `!important` forces these styles to win over Bootstrap's own styles (which are quite specific and would otherwise take priority).
+- All four properties use CSS variables so they automatically switch in dark mode.
 
----
-
-## 📋 SECTION 6 — FETCH AND RENDER (Lines 117–163)
-
-### `fetchTasks()` — Loads Tasks From the Database
-
-```javascript
-async function fetchTasks() {
-    const { data: { user } } = await db.auth.getUser();
-```
-- Gets the current user's info again — specifically needed for the `user.id` filter.
-
-```javascript
-    const { data, error } = await db.from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('deadline', { ascending: true });
-```
-- This builds and executes a **SQL-like query** using Supabase's query builder:
-  - `.from('tasks')` — FROM tasks table
-  - `.select('*')` — SELECT all columns (equivalent to `SELECT *`)
-  - `.eq('user_id', user.id)` — WHERE user_id = current user's ID (this is the security filter)
-  - `.order('deadline', { ascending: true })` — ORDER BY deadline ASC (soonest first)
-- The `await` waits for the network request to complete.
-- `data` will be an array of task objects, `error` will be null if successful.
-
-```javascript
-    if (!error) renderTable(data);
+```css
+.btn-save {
+    background: linear-gradient(135deg,var(--accent),var(--accent2));
+    color: white; border: none; border-radius: 10px;
+    font-weight: 600; padding: 12px; width: 100%;
+    transition: 0.2s;
 }
 ```
-- Only calls `renderTable()` if no error occurred.
-- If there was an error, silently fails (no alert here — could be improved).
+- Styles the "Save Task" button with a purple-to-blue diagonal gradient.
+- `135deg` = diagonal gradient (top-left to bottom-right).
+- `width: 100%` makes the button span the full width of its container.
+- `transition: 0.2s` enables smooth hover animations.
+
+```css
+.btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+```
+- On hover: slightly fades (90% opacity) and lifts 1px upward.
+- `translateY(-1px)` moves the element 1px up — gives a subtle "lift" effect.
+- Combined with the quick `0.2s` transition, this feels responsive and polished.
 
 ---
 
-### `renderTable(tasks)` — Builds the HTML Table
+### Badge and Table Styles
 
-```javascript
-function renderTable(tasks) {
-    const tbody = document.getElementById('taskTableBody');
+```css
+.badge-high { background: #ef4444; color: white; }
+.badge-medium { background: #f59e0b; color: white; }
+.badge-low { background: #22c55e; color: white; }
 ```
-- Gets the `<tbody>` element — the body of the HTML table where rows will be injected.
+- Custom badge colors for the priority labels:
+  - `#ef4444` = red (High priority — urgent)
+  - `#f59e0b` = amber/yellow (Medium priority — moderate)
+  - `#22c55e` = green (Low priority — relaxed)
+- These class names are generated dynamically in `script.js` using `badge-${t.priority.toLowerCase()}`.
 
-```javascript
-    const counter = document.getElementById('taskCounter');
-    if(counter) counter.innerText = tasks.length + ' Tasks';
+```css
+.task-img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid var(--input-border); }
 ```
-- Gets the badge element showing the task count.
-- `tasks.length` is the number of items in the array — e.g., `5`.
-- `+ ' Tasks'` concatenates to produce `"5 Tasks"`.
-- The `if(counter)` guard prevents errors if the element doesn't exist.
+- Styles the thumbnail images shown in the task table.
+- `45px × 45px` = fixed square size.
+- `object-fit: cover` crops the image to fill the square without stretching — maintains aspect ratio by cropping excess.
+- `border-radius: 8px` slightly rounds the corners of the thumbnail.
 
-```javascript
-    if (!tasks || tasks.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-4">No tasks found.</td></tr>`;
-        return;
-    }
+```css
+.table th { border: none; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
 ```
-- `!tasks` handles the case where `data` was `null` or `undefined`.
-- `tasks.length === 0` handles an empty array (no tasks yet).
-- `colspan="6"` makes one cell span all 6 columns so the message is centered across the full table.
-- `return` exits the function — no point running the `.map()` below if there's nothing to map.
+- Styles table header cells (`<th>`):
+  - `border: none` removes Bootstrap's default bottom border on headers.
+  - `color: var(--accent)` — purple headers.
+  - `text-transform: uppercase` — makes all header text UPPERCASE automatically (no need to type it in caps).
+  - `font-size: 0.75rem` = 12px — small, compact header text.
 
-```javascript
-    tbody.innerHTML = tasks.map(t => {
+```html
+</style>
+</head>
 ```
-- `.map()` transforms each task object `t` in the array into an HTML string.
-- `tbody.innerHTML = ` sets the entire inner HTML of the table body at once, replacing whatever was there before (this is how the table "refreshes").
-
-```javascript
-        let fileDisplay = '<span style="opacity:0.3;">📄</span>';
-```
-- Default file icon — a faded document emoji shown when no file is attached.
-- `let` is used because this variable will potentially be reassigned in the `if` blocks below.
-
-```javascript
-        if (t.image_url) {
-```
-- Checks if the task has a file URL saved. If `image_url` is `null`, this block is skipped.
-
-```javascript
-            const url = t.image_url.toLowerCase();
-```
-- Converts the URL to lowercase before checking extensions.
-- This is important because `.JPG` and `.jpg` should both be treated as images — `.toLowerCase()` ensures the comparison is case-insensitive.
-
-```javascript
-            if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-```
-- `.match()` tests the string against a **regular expression** (regex).
-- `/\.(jpg|jpeg|png|gif|webp)$/` means:
-  - `\.` — a literal dot (backslash escapes the special meaning of `.` in regex)
-  - `(jpg|jpeg|png|gif|webp)` — any of these extensions
-  - `$` — at the **end** of the string
-- If the URL ends in any of those extensions, it's an image.
-
-```javascript
-                fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
-```
-- Sets `fileDisplay` to an actual `<img>` tag showing a thumbnail of the image.
-- `onclick="window.open(..., '_blank')"` opens the full image in a new browser tab when clicked.
-- `cursor:pointer` changes the mouse cursor to a hand when hovering, signaling it's clickable.
-
-```javascript
-            } else if (url.endsWith('.pdf')) {
-                fileDisplay = `<span ...>📕</span>`;
-```
-- `.endsWith('.pdf')` checks if the URL ends with `.pdf` — simpler than regex for single extensions.
-- Shows a red book emoji as a clickable icon for PDF files.
-
-```javascript
-            } else if (url.includes('.doc')) {
-                fileDisplay = `<span ...>📘</span>`;
-```
-- `.includes('.doc')` checks if `.doc` appears **anywhere** in the URL — this catches both `.doc` and `.docx`.
-- Shows a blue book emoji for Word documents.
-
-```javascript
-            } else {
-                fileDisplay = `<span ...>📁</span>`;
-            }
-        }
-```
-- Catch-all for any other file type (zip, txt, xlsx, etc.) — shows a generic folder emoji.
-
-```javascript
-        return `
-            <tr>
-                <td>${fileDisplay}</td>
-                <td><strong>${t.task_name}</strong></td>
-                <td>${t.subject}</td>
-                <td>${t.deadline}</td>
-                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
-                <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
-            </tr>
-        `;
-```
-- Returns the complete HTML for one table row as a template literal string.
-- `${fileDisplay}` — inserts whichever file display was built above.
-- `<strong>${t.task_name}</strong>` — bolds the task name.
-- `badge-${t.priority.toLowerCase()}` — generates class names like `badge-high`, `badge-medium`, `badge-low`, which are styled with red/yellow/green colors in the CSS.
-- `onclick="deleteTask(${t.id})"` — embeds the task's actual database ID directly into the HTML so the delete button knows which row to delete.
-
-```javascript
-    }).join('');
-}
-```
-- `.map()` returns an **array** of HTML strings — one per task.
-- `.join('')` joins all those strings into one single string with no separator.
-- This final string is what gets set as `tbody.innerHTML`.
+- Closes the `<style>` block and the `<head>` section.
 
 ---
 
-### `deleteTask(id)` — Removes a Task
+## 🖥️ SECTION 3 — HEADER (Lines 96–105)
 
-```javascript
-async function deleteTask(id) {
+```html
+<body>
 ```
-- Takes `id` as a parameter — the specific task's database ID, passed in from the delete button's `onclick`.
+- Everything from here is **visible content** rendered on screen.
 
-```javascript
-    if(confirm("Delete this task?")) {
+```html
+<div class="header-section" id="mainHeader">
 ```
-- `confirm()` is a browser built-in that shows a dialog with OK and Cancel buttons.
-- Returns `true` if OK was clicked, `false` if Cancel — so the `if` only proceeds on confirmation.
-- This prevents accidental deletions.
+- A `<div>` (generic container) with the `.header-section` class (applies the animated gradient styles) and `id="mainHeader"` for JavaScript reference if needed.
 
-```javascript
-        const { error } = await db.from('tasks').delete().eq('id', id);
+```html
+    <h1>📚 STUDY SMART</h1>
 ```
-- Builds the DELETE query:
-  - `.from('tasks')` — target the tasks table
-  - `.delete()` — perform a DELETE operation
-  - `.eq('id', id)` — WHERE id = the specific task ID
-- Without `.eq()`, this would delete **all tasks** — the filter is critical.
+- The largest heading level — the app's main title.
+- `<h1>` is important for accessibility and SEO — should be used once per page for the main title.
+- The 📚 emoji is purely visual decoration.
 
-```javascript
-        if(!error) fetchTasks();
-    }
-}
+```html
+    <p>Efficient Academic Task Management</p>
 ```
-- If deletion succeeded (no error), refreshes the table so the deleted task disappears immediately.
-- If there was an error, silently fails (again, could be improved with an alert).
+- A subtitle/tagline in a paragraph tag beneath the main heading.
+
+```html
+    <div class="d-flex justify-content-center gap-2 mt-2">
+```
+- `d-flex` — Bootstrap class that sets `display: flex`, enabling flexbox layout.
+- `justify-content-center` — centers children horizontally inside the flex container.
+- `gap-2` — Bootstrap spacing: adds 0.5rem (8px) gap between flex children (the two buttons).
+- `mt-2` — Bootstrap margin-top utility: adds 0.5rem top margin.
+
+```html
+        <button class="btn btn-outline-light btn-sm px-3" onclick="toggleDarkMode()">🌙 Theme</button>
+```
+- `btn` — Bootstrap's base button class (handles sizing, cursor, focus styles).
+- `btn-outline-light` — transparent background with white border and text (looks good on the colorful gradient).
+- `btn-sm` — small button size.
+- `px-3` — Bootstrap padding: 1rem (16px) left and right padding.
+- `onclick="toggleDarkMode()"` — calls the JavaScript function directly when clicked.
+
+```html
+        <button class="btn btn-outline-light btn-sm px-3" id="logoutBtn" onclick="signOut()" style="display:none;">🚪 Logout</button>
+```
+- Same styling as the theme button.
+- `id="logoutBtn"` — JavaScript uses this ID to find and show this button after login (`logoutBtn.style.display = 'block'`).
+- `style="display:none;"` — **inline style** that hides the button by default. It's hidden until the user logs in.
+- `onclick="signOut()"` — triggers the logout function.
+
+```html
+    </div>
+</div>
+```
+- Closes the flex button container div and the header section div.
 
 ---
 
-## ⏲️ SECTION 7 — TIMER LOGIC (Lines 165–195)
+## 📦 SECTION 4 — MAIN CONTAINER (Line 107)
 
-```javascript
-let timer;
+```html
+<div class="container pb-5">
 ```
-- Declares `timer` without assigning a value (it's `undefined` initially).
-- `let` is used because this will be reassigned when the timer starts.
-- This will hold the **interval ID** returned by `setInterval()` — needed to stop the timer.
-
-```javascript
-let timeLeft = 1500;
-```
-- Initializes the countdown at 1500 seconds.
-- 1500 ÷ 60 = **25 minutes** (a standard Pomodoro work session).
-
-```javascript
-let isRunning = false;
-```
-- A **flag variable** tracking the timer's state.
-- Starts as `false` (timer not running).
-- These three variables are declared **outside** any function so they persist across function calls (they're module-level state).
+- `container` — Bootstrap class that creates a centered, responsive-width wrapper with automatic left/right margins. On large screens it has a max-width; on small screens it spans full width.
+- `pb-5` — Bootstrap padding-bottom utility: adds 3rem (48px) padding at the bottom so content doesn't get clipped at the bottom of the page.
 
 ---
 
-### `toggleTimer()` — Start or Pause the Timer
+## 🔐 SECTION 5 — AUTH SECTION (Lines 108–121)
 
-```javascript
-function toggleTimer() {
-    const btn = document.getElementById('timerBtn');
+```html
+    <div id="auth-section" class="row justify-content-center">
 ```
-- Gets the timer button to update its label.
+- `id="auth-section"` — JavaScript hides this entire div after login using `classList.add('d-none')`.
+- `row` — Bootstrap grid row (needed before column divs).
+- `justify-content-center` — centers the column horizontally within the row.
 
-```javascript
-    if (isRunning) {
-        clearInterval(timer);
-        btn.innerText = "Start";
+```html
+        <div class="col-md-4">
 ```
-- If the timer is currently running:
-  - `clearInterval(timer)` cancels the interval — stops calling `updateTimer` every second. The `timer` variable (interval ID) is used here to identify which interval to clear.
-  - Changes button text to "Start" signaling the user can resume.
+- Bootstrap grid column: takes up 4 out of 12 columns on medium+ screens (≥768px wide).
+- On small screens (mobile), it automatically expands to full width.
+- 4/12 = 33% width — makes the login form a narrow centered card, not spanning the full page.
 
-```javascript
-    } else {
-        timer = setInterval(updateTimer, 1000);
-        btn.innerText = "Pause";
-    }
+```html
+            <div class="card p-4">
 ```
-- If the timer is NOT running:
-  - `setInterval(updateTimer, 1000)` schedules `updateTimer` to be called every **1000 milliseconds** (1 second) indefinitely.
-  - The return value (a numeric interval ID) is stored in `timer` for later cancellation.
-  - Button changes to "Pause".
+- A Bootstrap card container.
+- `p-4` — Bootstrap padding: 1.5rem (24px) on all sides inside the card.
 
-```javascript
-    isRunning = !isRunning;
-}
+```html
+                <h4 class="text-center mb-3 fw-bold" id="authTitle">Welcome Back</h4>
 ```
-- `!isRunning` flips the boolean: `true` becomes `false`, `false` becomes `true`.
-- This always correctly reflects the new state after the toggle.
+- `h4` — 4th level heading, smaller than h1.
+- `text-center` — Bootstrap: centers text.
+- `mb-3` — Bootstrap margin-bottom: 1rem (16px) below the heading.
+- `fw-bold` — Bootstrap: font-weight bold.
+- `id="authTitle"` — JavaScript changes this text between "Welcome Back" and "Join StudySmart".
+
+```html
+                <input type="email" id="email" class="form-control mb-2" placeholder="Email Address">
+```
+- `type="email"` — HTML5 email input: browsers validate the `@` symbol and show an email keyboard on mobile.
+- `id="email"` — JavaScript reads this with `document.getElementById('email').value`.
+- `form-control` — Bootstrap class that styles inputs with proper sizing, borders, and focus states.
+- `mb-2` — 0.5rem (8px) margin below.
+- `placeholder` — gray hint text shown when the field is empty.
+
+```html
+                <input type="password" id="password" class="form-control mb-3" placeholder="Password">
+```
+- `type="password"` — browser automatically masks characters as dots/asterisks for security.
+- `mb-3` — slightly more bottom margin than the email field (separates it visually from the button).
+
+```html
+                <button class="btn btn-primary w-100 fw-bold" id="authBtn" onclick="signIn()">Log In</button>
+```
+- `btn-primary` — Bootstrap's blue button (the default primary action color).
+- `w-100` — Bootstrap: `width: 100%` — button stretches full width of the card.
+- `fw-bold` — bold text.
+- `id="authBtn"` — JavaScript rewires its `onclick` attribute and changes its text via `toggleAuthMode()`.
+- Default `onclick="signIn()"` — starts in login mode.
+
+```html
+                <p class="text-center mt-3 small">
+                    <span id="authMsg">New to StudySmart?</span> 
+                    <a href="#" onclick="toggleAuthMode()" id="toggleLink">Create Account</a>
+                </p>
+```
+- `mt-3` — 1rem top margin.
+- `small` — Bootstrap: reduces font size slightly.
+- `<span id="authMsg">` — the "New to StudySmart?" text. Note: this `id` is declared but never used by `script.js` — it's unused.
+- `<a href="#">` — `href="#"` is a placeholder link (goes nowhere, stays on same page).
+- `onclick="toggleAuthMode()"` — switches the form mode when clicked.
+- `id="toggleLink"` — JavaScript changes this link's text between "Create Account" and "Log In".
 
 ---
 
-### `updateTimer()` — Called Every Second
+## 🖥️ SECTION 6 — MAIN APP (Lines 123–172)
 
-```javascript
-function updateTimer() {
-    if (timeLeft <= 0) {
+```html
+    <div id="main-app" class="row d-none">
 ```
-- Checks if the countdown has hit zero.
-
-```javascript
-        clearInterval(timer);
-```
-- Stops the interval so `updateTimer` stops being called.
-
-```javascript
-        alert("Time is up! Take a break.");
-```
-- Shows a browser alert. Note: `alert()` is **blocking** — it pauses all JavaScript until the user closes it.
-
-```javascript
-        timeLeft = 1500;
-```
-- Resets the counter back to 25 minutes so the timer can be used again.
-
-```javascript
-        document.getElementById('timerBtn').innerText = "Start";
-        isRunning = false;
-```
-- Resets the button label and state flag to reflect that the timer is stopped.
-
-```javascript
-    } else {
-        timeLeft--;
-    }
-```
-- `timeLeft--` is shorthand for `timeLeft = timeLeft - 1`.
-- Decrements the counter by 1 second.
-- This runs every time `updateTimer` is called (every 1000ms), counting down.
-
-```javascript
-    const mins = Math.floor(timeLeft / 60);
-```
-- `Math.floor()` rounds **down** to the nearest whole number.
-- Example: `timeLeft = 90` → `90 / 60 = 1.5` → `Math.floor(1.5) = 1` → 1 minute.
-
-```javascript
-    const secs = timeLeft % 60;
-```
-- `%` is the **modulo operator** — returns the remainder after division.
-- Example: `90 % 60 = 30` → 30 seconds remaining.
-- Together with `mins`, this converts a raw second count into a minutes:seconds format.
-
-```javascript
-    document.getElementById('timerDisplay').innerText = 
-        `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-}
-```
-- Updates the large timer display in the UI.
-- `secs < 10 ? '0' : ''` is a **ternary operator** (compact if/else):
-  - If seconds is less than 10 (e.g., 7), prepend `'0'` → `"07"`
-  - Otherwise prepend nothing → `"42"`
-  - This gives `"4:07"` instead of `"4:7"`, which looks correct for a timer.
+- `id="main-app"` — JavaScript reveals this after login: `appBox.classList.remove('d-none')`.
+- `d-none` — Bootstrap: `display: none` — hidden by default until login.
+- `row` — Bootstrap grid row containing two columns (the left sidebar and the right task table).
 
 ---
 
-## 🌙 SECTION 8 — DARK MODE (Lines 197–201)
+### Left Column — Timer and Task Form
 
-### `toggleDarkMode()`
-
-```javascript
-function toggleDarkMode() {
-    const body = document.body;
+```html
+        <div class="col-md-4">
 ```
-- `document.body` directly references the `<body>` HTML element — no `getElementById` needed since there's only one body.
+- Left column: 4/12 columns wide on medium+ screens (33% width).
+- Contains the focus timer card and the new task form card.
 
-```javascript
-    body.setAttribute('data-theme', 
-        body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-}
+```html
+            <div class="card p-3 text-center mb-4">
+                <h6>⏲️ Focus Timer</h6>
 ```
-- `body.getAttribute('data-theme')` reads the current value of the `data-theme` attribute.
-- The ternary checks: if it's currently `'dark'`, set it to `'light'`; otherwise set it to `'dark'`.
-- `body.setAttribute('data-theme', ...)` writes that new value back to the element.
-- This works because the CSS at the top of the HTML has:
-  ```css
-  [data-theme="dark"] { --bg: #0f0e1a; --text: #ede9fe; ... }
-  ```
-  Changing the attribute triggers the browser to apply a completely different set of CSS variables, repainting the entire UI instantly — no page reload needed.
+- Timer card. `p-3` = 1rem padding. `mb-4` = 1.5rem bottom margin.
+- `h6` — smallest standard heading level.
+
+```html
+                <div class="timer-num" id="timerDisplay">25:00</div>
+```
+- `timer-num` class — applies the large purple bold timer font style.
+- `id="timerDisplay"` — JavaScript updates this with `document.getElementById('timerDisplay').innerText`.
+- `25:00` — the initial display value (matches `timeLeft = 1500` in JS).
+
+```html
+                <button class="btn btn-primary btn-sm mt-2 px-4" onclick="toggleTimer()" id="timerBtn">Start</button>
+```
+- `mt-2` — 8px top margin, separating from the timer display.
+- `px-4` — 1.5rem horizontal padding, making the button wider.
+- `id="timerBtn"` — JavaScript changes its text between "Start" and "Pause".
+
+```html
+            <div class="card p-4">
+                <h5 class="mb-3 fw-bold">✏️ New Task</h5>
+```
+- Task form card with a bold heading.
+
+```html
+                <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
+```
+- Plain text input for the task name.
+- `id="task_name"` — read by JavaScript: `document.getElementById('task_name').value`.
+- The self-closing `/>` is optional in HTML5 but some developers use it for clarity.
+
+```html
+                <input type="text" id="subject" class="form-control mb-2" placeholder="Subject (e.g., DBMS, HCI)" />
+```
+- Text input for the course/subject name.
+- The placeholder gives concrete examples to guide users.
+
+```html
+                <label class="small text-muted ms-1 mb-1">Due Date</label>
+                <input type="date" id="deadline" class="form-control mb-2" />
+```
+- `<label>` provides a text label above the date input.
+- `text-muted` — Bootstrap: gray, lower-contrast text (for secondary labels).
+- `ms-1` — Bootstrap: 0.25rem left margin (slight indent).
+- `type="date"` — renders a **native date picker** (calendar popup) in the browser.
+- The value returned is always in `YYYY-MM-DD` format regardless of how it displays to the user.
+
+```html
+                <label class="small text-muted ms-1 mb-1">File Attachment</label>
+                <input type="file" id="task_image" class="form-control mb-3" />
+```
+- Label + file input pair.
+- `type="file"` — opens the OS file picker dialog.
+- Despite being named `task_image`, the JavaScript accepts any file type (PDF, DOC, images, etc.).
+- `id="task_image"` — JavaScript accesses it: `document.getElementById('task_image').files[0]`.
+
+```html
+                <label class="small text-muted ms-1 mb-1">Priority Level</label>
+                <select id="priority" class="form-select mb-4">
+                    <option value="High">🔴 High Priority</option>
+                    <option value="Medium" selected>🟡 Medium Priority</option>
+                    <option value="Low">🟢 Low Priority</option>
+                </select>
+```
+- `<select>` creates a dropdown menu.
+- `form-select` — Bootstrap class that styles dropdowns similarly to `form-control`.
+- `mb-4` — 1.5rem bottom margin, more spacing before the save button.
+- Each `<option>` has a `value` attribute (what gets saved to the database) separate from its display text (what the user sees with emojis).
+- `selected` on the Medium option makes it the **default selection** when the page loads.
+
+```html
+                <button class="btn-save" id="saveBtn" onclick="saveTask()">Save Task</button>
+```
+- Uses the custom `btn-save` class (not Bootstrap's `btn`) for the gradient button style.
+- `id="saveBtn"` — JavaScript disables it and changes its text during saving.
+- `onclick="saveTask()"` — triggers the full save workflow.
 
 ---
 
-## 🚀 SECTION 9 — ENTRY POINT (Line 203)
+### Right Column — Task Table
 
-```javascript
-window.onload = checkUserSession;
+```html
+        <div class="col-md-8">
 ```
-- `window` is the global browser object representing the entire browser window.
-- `window.onload` is an event that fires when the **page has fully loaded** — all HTML parsed, all scripts loaded.
-- `= checkUserSession` (without parentheses) assigns the **function itself** as the handler — not the result of calling it.
-- This is the **first thing that runs** when the app opens. It immediately checks if a session exists and either shows the app or the login form accordingly.
-- This is what enables the "stay logged in" experience — your session persists across browser refreshes.
+- Right column: 8/12 columns wide (67% width) — the larger portion for the task list.
+- 4 + 8 = 12, which is Bootstrap's full grid width. Together the two columns span the full row.
+
+```html
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold">Pending Tasks</h5>
+                <span class="badge bg-primary px-3" id="taskCounter">0 Tasks</span>
+            </div>
+```
+- `d-flex` — flex container putting the heading and badge on the same line.
+- `justify-content-between` — pushes heading to the far left and badge to the far right.
+- `align-items-center` — vertically centers both items in the row.
+- `<span>` with `badge` and `bg-primary` — Bootstrap badge: a small blue pill showing the task count.
+- `id="taskCounter"` — JavaScript updates this: `counter.innerText = tasks.length + ' Tasks'`.
+- Starts at "0 Tasks" as a placeholder before data loads.
+
+```html
+            <div class="card p-3">
+                <div class="table-responsive">
+```
+- `table-responsive` — Bootstrap wrapper that adds horizontal scrolling to the table on small screens, preventing layout overflow.
+
+```html
+                    <table class="table align-middle">
+```
+- `table` — Bootstrap's base table class (adds proper spacing and borders).
+- `align-middle` — Bootstrap: vertically centers all cell content.
+
+```html
+                        <thead>
+                            <tr>
+                                <th>Pic/File</th>
+                                <th>Task</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Priority</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+```
+- `<thead>` groups the header row — semantically distinct from data rows.
+- Each `<th>` is a **header cell** (bold by default, also styled by the `.table th` CSS rule).
+- 6 columns total — these correspond to the 6 `<td>` cells generated in `renderTable()`.
+
+```html
+                        <tbody id="taskTableBody">
+                        </tbody>
+```
+- `<tbody>` is the body of the table where data rows go.
+- `id="taskTableBody"` — JavaScript targets this: `document.getElementById('taskTableBody')` and sets its `innerHTML` with all the task rows.
+- Starts empty — JavaScript fills it after fetching tasks.
+
+```html
+</div></div></div></div></div>
+```
+- Closes: table-responsive div → card div → col-md-8 div → row div → container div. Each closing tag ends one of the nested containers opened above.
+
+---
+
+## 📜 SECTION 7 — SCRIPT TAG (Last Line in Body)
+
+```html
+<script src="script.js"></script>
+```
+- Loads the JavaScript file that contains all the app logic.
+- Placed at the **very bottom of `<body>`** — this is intentional and important:
+  - By the time this line is reached, all the HTML above has already been parsed and the DOM elements exist.
+  - If it were in `<head>`, the script would run before the HTML was built, and `document.getElementById()` calls would return `null` (elements don't exist yet).
+- `src="script.js"` — a relative path, meaning the file must be in the **same folder** as `index.html`.
+
+```html
+</body>
+</html>
+```
+- Closes the body and the root HTML element.
+- Every HTML file should end with these two closing tags.
