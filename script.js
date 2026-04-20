@@ -165,7 +165,7 @@ function renderTable(tasks) {
             } else if (url.endsWith('.pdf')) {
                 fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📕</span>`;
             } else {
-                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📁</span>`;
+                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📘</span>`;
             }
         }
 
