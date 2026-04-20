@@ -2,6 +2,11 @@
 const SUPABASE_URL = 'https://lafiafbqccrojlkjgcvk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Get today's date in YYYY-MM-DD format
+const today = new Date().toISOString().split('T')[0];
+
+// Set the "min" attribute of the date picker to today
+document.getElementById('deadline').setAttribute('min', today);
 
 // 2. AUTHENTICATION LOGIC
 function toggleAuthMode() {
