@@ -20,6 +20,19 @@ function toggleAuthMode() {
         link.innerText = "Create Account";
     }
 }
+function checkDeadlines(tasks) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+    tasks.forEach(t => {
+        if (t.deadline === tomorrowStr) {
+            alert(`⚠️ URGENT: The task "${t.task_name}" expires tomorrow!`);
+        } else if (new Date(t.deadline) < new Date()) {
+            console.log(`Expired: ${t.task_name}`);
+        }
+    });
+}
 
 async function signUp() {
     const email = document.getElementById('email').value;
