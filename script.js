@@ -20,6 +20,7 @@ function toggleAuthMode() {
         link.innerText = "Create Account";
     }
 }
+//3. DEADLINE LOGIC
 function checkDeadlines(tasks) {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
