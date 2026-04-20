@@ -86,6 +86,7 @@
         }
         .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
 
+        /* Priority Colors */
         .badge-high { background: #ef4444; color: white; }
         .badge-medium { background: #f59e0b; color: white; }
         .badge-low { background: #22c55e; color: white; }
@@ -124,7 +125,7 @@
     <div id="main-app" class="row d-none">
         <div class="col-md-4">
             <div class="card p-3 text-center mb-4">
-                <h6>⏲️ Pomodoro </h6>
+                <h6>⏲️ Pomodoro</h6>
                 <div class="timer-num" id="timerDisplay">25:00</div>
                 <button class="btn btn-primary btn-sm mt-2 px-4" onclick="toggleTimer()" id="timerBtn">Start</button>
             </div>
@@ -133,11 +134,11 @@
                 <h5 class="mb-3 fw-bold">✏️ New Task</h5>
                 <input type="text" id="task_name" class="form-control mb-2" placeholder="Task Name" />
                 <input type="text" id="subject" class="form-control mb-2" placeholder="Subject (e.g., DBMS, HCI)" />
-                <label class="small text-muted ms-1 mb-1">Due Date</label>
-                <input type="date" id="deadline" class="form-control">
-             
                 
-                <label class="small text-muted ms-1 mb-1">File Attachment</label>
+                <label class="small text-muted ms-1 mb-1">Due Date</label>
+                <input type="date" id="deadline" class="form-control mb-3">
+                
+                <label class="small text-muted ms-1 mb-1">File Attachment (PDF/IMG)</label>
                 <input type="file" id="task_image" class="form-control mb-3" />
 
                 <label class="small text-muted ms-1 mb-1">Priority Level</label>
@@ -146,6 +147,7 @@
                     <option value="Medium" selected>🟡 Medium Priority</option>
                     <option value="Low">🟢 Low Priority</option>
                 </select>
+                
                 <button class="btn-save" id="saveBtn" onclick="saveTask()">Save Task</button>
             </div>
         </div>
