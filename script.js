@@ -2,11 +2,6 @@
 const SUPABASE_URL = 'https://lafiafbqccrojlkjgcvk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TLRwCGXv6swosm6ntUguow_aRSkS0We';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-// Get today's date in YYYY-MM-DD format
-const today = new Date().toISOString().split('T')[0];
-
-// Set the "min" attribute of the date picker to today
-document.getElementById('deadline').setAttribute('min', today);
 
 // 2. AUTHENTICATION LOGIC
 function toggleAuthMode() {
@@ -24,20 +19,6 @@ function toggleAuthMode() {
         btn.setAttribute("onclick", "signIn()");
         link.innerText = "Create Account";
     }
-}
-//3. DEADLINE LOGIC
-function checkDeadlines(tasks) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-
-    tasks.forEach(t => {
-        if (t.deadline === tomorrowStr) {
-            alert(`⚠️ URGENT: The task "${t.task_name}" expires tomorrow!`);
-        } else if (new Date(t.deadline) < new Date()) {
-            console.log(`Expired: ${t.task_name}`);
-        }
-    });
 }
 
 async function signUp() {
@@ -61,7 +42,7 @@ async function signOut() {
     location.reload();
 }
 
-// 3. SESSION CHECK
+// 3. SESSION & DEADLINE LOGIC
 async function checkUserSession() {
     const { data: { user } } = await db.auth.getUser();
     const loginBox = document.getElementById('auth-section');
@@ -76,13 +57,25 @@ async function checkUserSession() {
     }
 }
 
-// 4. UNIVERSAL FILE UPLOAD
+function checkDeadlines(tasks) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    tasks.forEach(t => {
+        if (t.deadline === tomorrowStr) {
+            alert(`⚠️ URGENT: The task "${t.task_name}" is due tomorrow!`);
+        }
+    });
+}
+
+// 4. FILE & DATA OPERATIONS
 async function uploadFile(file) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
 
     let { error: uploadError } = await db.storage
-        .from('task-images') // Ensure this matches your Supabase Dashboard name
+        .from('task-images')
         .upload(fileName, file);
 
     if (uploadError) throw uploadError;
@@ -91,7 +84,6 @@ async function uploadFile(file) {
     return data.publicUrl;
 }
 
-// 5. SAVE TASK
 async function saveTask() {
     const { data: { user } } = await db.auth.getUser();
     if (!user) return alert("Please log in first!");
@@ -140,7 +132,6 @@ async function saveTask() {
     }
 }
 
-// 6. RENDER AND FETCH
 async function fetchTasks() {
     const { data: { user } } = await db.auth.getUser();
     const { data, error } = await db.from('tasks')
@@ -148,7 +139,10 @@ async function fetchTasks() {
         .eq('user_id', user.id)
         .order('deadline', { ascending: true });
 
-    if (!error) renderTable(data);
+    if (!error) {
+        renderTable(data);
+        checkDeadlines(data); // Checks for tomorrow's deadlines on load
+    }
 }
 
 function renderTable(tasks) {
@@ -170,8 +164,6 @@ function renderTable(tasks) {
                 fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
             } else if (url.endsWith('.pdf')) {
                 fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📕</span>`;
-            } else if (url.includes('.doc')) {
-                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📘</span>`;
             } else {
                 fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📁</span>`;
             }
@@ -197,9 +189,9 @@ async function deleteTask(id) {
     }
 }
 
-// 7. TIMER LOGIC
+// 5. TIMER & THEME
 let timer;
-let timeLeft = 1500; // 25 minutes
+let timeLeft = 1500; 
 let isRunning = false;
 
 function toggleTimer() {
@@ -224,11 +216,9 @@ function updateTimer() {
     } else {
         timeLeft--;
     }
-    
     const mins = Math.floor(timeLeft / 60);
     const secs = timeLeft % 60;
-    document.getElementById('timerDisplay').innerText = 
-        `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
 function toggleDarkMode() {
@@ -236,4 +226,15 @@ function toggleDarkMode() {
     body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
-window.onload = checkUserSession;
+// 6. INITIALIZATION ON LOAD
+window.onload = function() {
+    // Check if user is logged in
+    checkUserSession();
+
+    // Prevent past dates in the calendar
+    const deadlineInput = document.getElementById('deadline');
+    if (deadlineInput) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        deadlineInput.setAttribute('min', todayStr);
+    }
+};
