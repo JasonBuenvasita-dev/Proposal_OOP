@@ -149,34 +149,42 @@ function renderTable(tasks) {
     const tbody = document.getElementById('taskTableBody');
     const counter = document.getElementById('taskCounter');
     if(counter) counter.innerText = tasks.length + ' Tasks';
-    
+
     if (!tasks || tasks.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-4">No tasks found.</td></tr>`;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>No tasks yet. Add your first task!</p>
+                    </div>
+                </td>
+            </tr>`;
         return;
     }
 
     tbody.innerHTML = tasks.map(t => {
-        let fileDisplay = '<span style="opacity:0.3;">📄</span>';
-        
+        let fileDisplay = '<span style="opacity:0.3;font-size:1.3rem;">📄</span>';
+
         if (t.image_url) {
             const url = t.image_url.toLowerCase();
             if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-                fileDisplay = `<img src="${t.image_url}" class="task-img" style="cursor:pointer;" onclick="window.open('${t.image_url}', '_blank')">`;
+                fileDisplay = `<img src="${t.image_url}" class="task-img" onclick="window.open('${t.image_url}', '_blank')">`;
             } else if (url.endsWith('.pdf')) {
-                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📕</span>`;
+                fileDisplay = `<span style="cursor:pointer;font-size:1.4rem;" onclick="window.open('${t.image_url}', '_blank')">📕</span>`;
             } else {
-                fileDisplay = `<span style="cursor:pointer; font-size:24px;" onclick="window.open('${t.image_url}', '_blank')">📘</span>`;
+                fileDisplay = `<span style="cursor:pointer;font-size:1.4rem;" onclick="window.open('${t.image_url}', '_blank')">📁</span>`;
             }
         }
 
         return `
             <tr>
                 <td>${fileDisplay}</td>
-                <td><strong>${t.task_name}</strong></td>
-                <td>${t.subject}</td>
-                <td>${t.deadline}</td>
-                <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
-                <td><button class="btn btn-sm text-danger" onclick="deleteTask(${t.id})">🗑</button></td>
+                <td class="task-name-cell">${t.task_name}</td>
+                <td class="subject-cell">${t.subject}</td>
+                <td class="deadline-cell">${t.deadline}</td>
+                <td><span class="priority-badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
+                <td><button class="btn-delete" onclick="deleteTask(${t.id})">🗑</button></td>
             </tr>
         `;
     }).join('');
@@ -223,11 +231,24 @@ function updateTimer() {
 
 function toggleDarkMode() {
     const body = document.body;
-    body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('ss-theme', newTheme);
+    updateThemeButton(newTheme);
+}
+
+function updateThemeButton(theme) {
+    const btn = document.getElementById('themeBtn');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
 }
 
 // 6. INITIALIZATION ON LOAD
 window.onload = function() {
+    // Restore saved theme (default: light)
+    const savedTheme = localStorage.getItem('ss-theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+
     // Check if user is logged in
     checkUserSession();
 
