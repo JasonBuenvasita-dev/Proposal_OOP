@@ -1,4 +1,4 @@
-# 📖 Complete Line-by-Line Breakdown of the `README.md`
+# 📚 StudySmart: Student Task & Focus Manager
 
 ---
 
