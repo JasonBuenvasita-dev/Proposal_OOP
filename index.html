@@ -414,6 +414,112 @@
 
         /* Prevent Bootstrap table styles from conflicting */
         .table-wrapper table { margin-bottom: 0; }
+
+        /* ─── NEW: DASHBOARD STYLES ──────────────────────────────── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
+
+        .dash-card {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 18px 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background 0.35s, border-color 0.35s;
+        }
+
+        .dash-card-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.63rem;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .dash-card-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--accent);
+        }
+
+        .dash-card-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .dash-card.dash-total   { border-top: 3px solid var(--accent); }
+        .dash-card.dash-done    { border-top: 3px solid #16a34a; }
+        .dash-card.dash-done    .dash-card-value { color: #16a34a; }
+        [data-theme="dark"] .dash-card.dash-done .dash-card-value { color: #4ade80; }
+        .dash-card.dash-pending { border-top: 3px solid #d97706; }
+        .dash-card.dash-pending .dash-card-value { color: #d97706; }
+        [data-theme="dark"] .dash-card.dash-pending .dash-card-value { color: #fbbf24; }
+        .dash-card.dash-urgent  { border-top: 3px solid #ef4444; }
+        .dash-card.dash-urgent  .dash-card-value { color: #ef4444; }
+        [data-theme="dark"] .dash-card.dash-urgent .dash-card-value { color: #f87171; }
+
+        .dash-progress-wrap {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            transition: background 0.35s;
+        }
+
+        .dash-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .dash-progress-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .dash-progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .dash-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: var(--input-border);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .dash-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+        /* ─── END DASHBOARD STYLES ───────────────────────────────── */
     </style>
 </head>
 <body>
@@ -508,6 +614,42 @@
 
         <!-- ── MAIN CONTENT ── -->
         <div class="col-12 col-lg-8">
+
+            <!-- ── NEW: DASHBOARD ─────────────────────────────────────── -->
+            <div class="dashboard-grid">
+                <div class="dash-card dash-total">
+                    <div class="dash-card-label">Total Tasks</div>
+                    <div class="dash-card-value" id="dash-total">0</div>
+                    <div class="dash-card-sub">all added tasks</div>
+                </div>
+                <div class="dash-card dash-pending">
+                    <div class="dash-card-label">Remaining</div>
+                    <div class="dash-card-value" id="dash-pending">0</div>
+                    <div class="dash-card-sub">not yet done</div>
+                </div>
+                <div class="dash-card dash-done">
+                    <div class="dash-card-label">Completed</div>
+                    <div class="dash-card-value" id="dash-done">0</div>
+                    <div class="dash-card-sub">marked as done</div>
+                </div>
+                <div class="dash-card dash-urgent">
+                    <div class="dash-card-label">High Priority</div>
+                    <div class="dash-card-value" id="dash-urgent">0</div>
+                    <div class="dash-card-sub">needs attention</div>
+                </div>
+            </div>
+
+            <div class="dash-progress-wrap">
+                <div class="dash-progress-header">
+                    <span class="dash-progress-title">Overall Completion</span>
+                    <span class="dash-progress-pct" id="dash-pct">0%</span>
+                </div>
+                <div class="dash-bar-bg">
+                    <div class="dash-bar-fill" id="dash-bar"></div>
+                </div>
+            </div>
+            <!-- ── END DASHBOARD ──────────────────────────────────────── -->
+
             <div class="tasks-header">
                 <h2 class="tasks-heading">Pending Tasks</h2>
                 <span class="task-count-badge" id="taskCounter">0 Tasks</span>
@@ -522,6 +664,7 @@
                                 <th>Subject</th>
                                 <th>Deadline</th>
                                 <th>Priority</th>
+                                <th>Done</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -534,6 +677,108 @@
     </div><!-- /main-app -->
 
 </div><!-- /app-body -->
+
+<!-- ── NEW: DASHBOARD SCRIPT (does not touch script.js) ───────── -->
+<script>
+    // Tracks which task IDs have been marked done in this session
+    const doneTasks = new Set();
+
+    // Called by the checkmark button in each row
+    function markDone(id, btn) {
+        if (doneTasks.has(id)) {
+            doneTasks.delete(id);
+            btn.textContent = '○';
+            btn.style.color = '';
+            btn.closest('tr').style.opacity = '1';
+            btn.closest('tr').style.textDecoration = 'none';
+        } else {
+            doneTasks.add(id);
+            btn.textContent = '✓';
+            btn.style.color = '#16a34a';
+            btn.closest('tr').style.opacity = '0.5';
+            btn.closest('tr').style.textDecoration = 'line-through';
+        }
+        refreshDashboard();
+    }
+
+    // Reads the current table rows and updates all dashboard numbers
+    function refreshDashboard() {
+        const rows = document.querySelectorAll('#taskTableBody tr[data-task-id]');
+        const total     = rows.length;
+        const done      = doneTasks.size;
+        const pending   = total - done;
+        const urgent    = document.querySelectorAll('#taskTableBody tr[data-priority="High"]').length;
+        const pct       = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        document.getElementById('dash-total').textContent   = total;
+        document.getElementById('dash-done').textContent    = done;
+        document.getElementById('dash-pending').textContent = pending;
+        document.getElementById('dash-urgent').textContent  = urgent;
+        document.getElementById('dash-pct').textContent     = pct + '%';
+        document.getElementById('dash-bar').style.width     = pct + '%';
+    }
+
+    // MutationObserver watches the tbody for any changes made by script.js
+    // and re-runs refreshDashboard automatically — no changes to script.js needed
+    const observer = new MutationObserver(() => {
+        doneTasks.clear(); // reset done state when tasks reload
+        refreshDashboard();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const tbody = document.getElementById('taskTableBody');
+        if (tbody) {
+            observer.observe(tbody, { childList: true, subtree: true });
+        }
+    });
+</script>
+<!-- ── END DASHBOARD SCRIPT ────────────────────────────────────── -->
+
+<!-- ── IMPORTANT: renderTable() in script.js must emit data-task-id and data-priority -->
+<!-- on each <tr>. Since we cannot change script.js, we patch it via a one-time override below. -->
+<script>
+    // Thin wrapper: intercepts after script.js renders the table and
+    // adds data attributes to each row so the dashboard can read them.
+    // This runs AFTER script.js loads (see script order below).
+    function patchTableRows() {
+        const rows = document.querySelectorAll('#taskTableBody tr');
+        rows.forEach(row => {
+            // Read the delete button's onclick to extract the task id
+            const delBtn = row.querySelector('button[onclick^="deleteTask"]');
+            if (delBtn) {
+                const match = delBtn.getAttribute('onclick').match(/deleteTask\((\d+)\)/);
+                if (match) row.setAttribute('data-task-id', match[1]);
+            }
+            // Read the priority badge class to extract priority level
+            const badge = row.querySelector('[class*="badge-"]');
+            if (badge) {
+                const cls = [...badge.classList].find(c => c.startsWith('badge-'));
+                if (cls) {
+                    const level = cls.replace('badge-', '');
+                    row.setAttribute('data-priority', level.charAt(0).toUpperCase() + level.slice(1));
+                }
+            }
+            // Add a Done toggle button if not already present
+            if (!row.querySelector('.done-btn')) {
+                const td = document.createElement('td');
+                const id = row.getAttribute('data-task-id');
+                const isDone = id && doneTasks.has(Number(id));
+                td.innerHTML = `<button class="done-btn" onclick="markDone(${id}, this)" style="background:none;border:1.5px solid var(--card-border);border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:0.85rem;color:var(--text-muted);transition:all 0.15s;">${isDone ? '✓' : '○'}</button>`;
+                // Insert before the last td (Action column)
+                const lastTd = row.querySelector('td:last-child');
+                row.insertBefore(td, lastTd);
+            }
+        });
+        refreshDashboard();
+    }
+
+    // Re-patch whenever tbody changes (after script.js re-renders)
+    const patchObserver = new MutationObserver(patchTableRows);
+    window.addEventListener('DOMContentLoaded', () => {
+        const tbody = document.getElementById('taskTableBody');
+        if (tbody) patchObserver.observe(tbody, { childList: true });
+    });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="script.js"></script>
